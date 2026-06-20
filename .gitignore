@@ -1,0 +1,15 @@
+# Secrets & private data — NEVER commit these
+certs/
+*.key
+*.pem
+.sf/
+
+# Real customer data (use accounts.sample.json as the template instead)
+accounts.json
+
+# Internal / generated docs that may carry identifiers
+*.docx
+
+# OS / editor
+.DS_Store
+Thumbs.db

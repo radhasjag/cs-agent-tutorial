@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sf data query:*)",
+      "Bash(sf data:query:*)",
+      "Bash(sf org display:*)",
+      "PowerShell(sf data query:*)",
+      "PowerShell(sf data:query:*)",
+      "PowerShell(sf org display:*)"
+    ],
+    "deny": [
+      "Bash(sf data create:*)",
+      "Bash(sf data update:*)",
+      "Bash(sf data delete:*)",
+      "Bash(sf data upsert:*)",
+      "Bash(sf data import:*)",
+      "Bash(sf data:create:*)",
+      "Bash(sf data:update:*)",
+      "Bash(sf data:delete:*)",
+      "Bash(sf data:upsert:*)",
+      "Bash(sf data:import:*)",
+      "Bash(sf apex run:*)",
+      "Bash(sf apex:run:*)",
+      "Bash(sf org delete:*)",
+      "Bash(sf org:delete:*)",
+      "PowerShell(sf data create:*)",
+      "PowerShell(sf data update:*)",
+      "PowerShell(sf data delete:*)",
+      "PowerShell(sf data upsert:*)",
+      "PowerShell(sf data import:*)",
+      "PowerShell(sf data:create:*)",
+      "PowerShell(sf data:update:*)",
+      "PowerShell(sf data:delete:*)",
+      "PowerShell(sf data:upsert:*)",
+      "PowerShell(sf data:import:*)",
+      "PowerShell(sf apex run:*)",
+      "PowerShell(sf apex:run:*)",
+      "PowerShell(sf org delete:*)",
+      "PowerShell(sf org:delete:*)"
+    ]
+  }
+}

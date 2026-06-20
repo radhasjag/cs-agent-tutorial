@@ -1,0 +1,8 @@
+[
+  { "name": "Acme Corporation", "vertical": "Corporate", "owner": "Jordan Lee", "state": "CA", "country": "United States" },
+  { "name": "Globex Energy", "vertical": "Corporate", "owner": "Jordan Lee", "state": "TX", "country": "United States" },
+  { "name": "Initech Analytics", "vertical": "Corporate", "owner": "Sam Patel", "state": "NY", "country": "United States" },
+  { "name": "State University of Example", "vertical": "Academic", "owner": "Sam Patel", "state": "MA", "country": "United States" },
+  { "name": "National Example Laboratory", "vertical": "Federal Government", "owner": "Riley Chen", "state": "NM", "country": "United States" },
+  { "name": "Department of Example Affairs", "vertical": "Federal Government", "owner": "Riley Chen", "state": "DC", "country": "United States" }
+]

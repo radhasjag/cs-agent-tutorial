@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "salesforce": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@salesforce/mcp",
+        "--orgs",
+        "your-org-alias",
+        "--tools",
+        "run_soql_query"
+      ]
+    }
+  }
+}
