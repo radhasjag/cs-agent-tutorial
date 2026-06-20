@@ -1,8 +1,9 @@
-# Setup Guide — Claude Desktop (no coding)
+# Setup Guide — Claude Desktop
 
-**You won't touch a terminal.** Everything here is done by clicking inside the **Claude
-desktop app** and signing in to your tools through your browser. Plan for about **15–20
-minutes**.
+**Almost everything is done by clicking inside the Claude desktop app.** One tool —
+**Salesforce** — needs a short, one-time technical setup (about 10 minutes). If you'd rather
+not do that part, it's the single piece you can hand to a technical teammate or IT — the rest
+you can do yourself. Plan for about **20–30 minutes** total.
 
 Works the same on **Windows and Mac**.
 
@@ -11,9 +12,10 @@ Works the same on **Windows and Mac**.
 ## What you need
 
 - A work computer (Windows or Mac)
-- Your normal work logins (Salesforce, Slack, Pendo, Google) — you'll just click "Connect"
-  and sign in as usual
-- About 15 minutes
+- Your normal work logins (Salesforce, Slack, Pendo, Google) — you'll click "Connect" and
+  sign in as usual
+- For the Salesforce step only: the ability to install a free tool on your computer (or a
+  teammate/IT who can do that one step)
 
 ---
 
@@ -45,21 +47,44 @@ you just turn them on:
 
 ---
 
-## Step 3 — Add Salesforce
+## Step 3 — Add Salesforce (the one technical step)
 
-Salesforce is the **one** tool that often isn't preconnected. Easiest options, in order:
+There is **no ready-made Salesforce connector** for our organization, so Salesforce is added
+through a small **MCP setup**. It's a one-time, ~10-minute job.
 
-1. **Check your Connectors list first** (Step 2) — your org may already offer a **Salesforce**
-   connector. If it's there, just **Connect** and sign in. Done.
-2. **If it's not there**, ask your **Salesforce admin** to enable Salesforce's **Hosted MCP
-   connector** for Claude (it's a sign-in link — no install on your side). Official guide:
-   👉 https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/claude.html
-3. **Ask for read-only access.** For this routine, Claude only needs to *read* Salesforce.
-   Request that the connection use a **read-only** Salesforce login so it can never change
-   your CRM data. (Details your admin can follow: [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md).)
+> 👋 **Not comfortable installing software? Hand this step to a technical teammate or IT** —
+> send them this section. Everything else in this guide you can do yourself.
 
-> A more technical, install-it-yourself Salesforce option exists if you ever need it — see
-> [`advanced/`](advanced/). Most people won't.
+You'll use your computer's command window for 3b–3c: **PowerShell** on Windows (Start → type
+"PowerShell") or **Terminal** on Mac (Cmd+Space → type "Terminal").
+
+**3a. Install Node.js** — a free engine the Salesforce tool needs. Download the **LTS**
+installer from 👉 **https://nodejs.org** and run it (just click through). Done once.
+
+**3b. Install the Salesforce CLI.** In the command window, paste this and press Enter:
+```
+npm install --global @salesforce/cli
+```
+
+**3c. Sign in to Salesforce** (opens your browser to log in as normal):
+```
+sf org login web --alias your-org-alias --set-default
+```
+
+**3d. Tell Claude how to reach Salesforce.** In the Claude desktop app, open
+**Settings → Developer → Edit Config** (this opens a file named `claude_desktop_config.json`).
+Paste in the Salesforce server entry from
+[`salesforce/salesforce-mcp-config.json`](salesforce/salesforce-mcp-config.json) — change
+`your-org-alias` to the alias you used in 3c — then **save and restart Claude**.
+- Reference: https://docs.claude.com/en/docs/claude-code/mcp
+
+**3e. Read-only safety.** That config limits Claude to a single **read-only** query tool, so
+it can't change Salesforce data. For an even stronger, org-enforced guarantee, ask your admin
+to set up a **read-only Salesforce login**:
+[docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md).
+
+> 💡 If `npm` or `sf` says "not recognized," close the command window and open a **new** one
+> after installing Node.js, then try again.
 
 ---
 
@@ -90,7 +115,7 @@ accounts that need attention.
   [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md)
 - **Auto-updating account docs in Google Drive** — needs an edit-capable Drive connector:
   [docs/google-docs-connector-request.md](docs/google-docs-connector-request.md)
-- **Technical / command-line route** (not needed for the above): [`advanced/`](advanced/)
+- **Extra Salesforce write-protection** (a client-side guardrail, on top of read-only): [`advanced/`](advanced/)
 
 ---
 

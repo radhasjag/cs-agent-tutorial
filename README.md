@@ -39,12 +39,13 @@ See a sample: [docs/sample-slack-digest.md](docs/sample-slack-digest.md).
        read │      read │       web │     send │
             ▼           ▼           ▼          ▼
        Salesforce     Pendo      Web search   Slack
-       (connector)  (connector)              (connector)
+        (MCP setup)  (connector)              (connector)
 ```
 
-Everything plugs in through **Claude connectors** — secure links to tools your company
-already uses. You connect them with a click and a browser sign-in. The only tool that
-sometimes needs an extra step is Salesforce (see [SETUP.md](SETUP.md), Step 3).
+Slack, Pendo, and Google Drive plug in through **Claude connectors** — secure links to tools
+your company already uses, enabled with a click and a browser sign-in. **Salesforce is the
+exception:** there's no connector for it in our org, so it's added with a short one-time
+**MCP setup** — the only technical part (see [SETUP.md](SETUP.md), Step 3).
 
 ---
 
@@ -54,8 +55,10 @@ sometimes needs an extra step is Salesforce (see [SETUP.md](SETUP.md), Step 3).
 
 In short:
 1. Install the **Claude desktop app** and sign in.
-2. **Connect** Slack, Pendo, and Salesforce (and Google Drive if you want the docs extension).
-3. Paste the routine from [examples/weekly-digest-task.md](examples/weekly-digest-task.md) and
+2. **Connect** Slack and Pendo (and Google Drive if you want the docs extension) — one click each.
+3. **Add Salesforce** via the short MCP setup ([SETUP.md](SETUP.md), Step 3) — or hand that one
+   step to a technical teammate / IT.
+4. Paste the routine from [examples/weekly-digest-task.md](examples/weekly-digest-task.md) and
    ask Claude to run it weekly.
 
 ---
@@ -72,13 +75,14 @@ set one up using [docs/salesforce-readonly-user-setup.md](docs/salesforce-readon
 
 | Path | What |
 |------|------|
-| [`SETUP.md`](SETUP.md) | **Start here** — click-by-click setup (no terminal) |
+| [`SETUP.md`](SETUP.md) | **Start here** — step-by-step setup (mostly click-based) |
+| [`salesforce/salesforce-mcp-config.json`](salesforce/salesforce-mcp-config.json) | Salesforce MCP config (read-only) — used in SETUP Step 3 |
 | [`examples/weekly-digest-task.md`](examples/weekly-digest-task.md) | The routine instructions you give Claude |
 | [`examples/accounts.sample.json`](examples/accounts.sample.json) | **Fake** account list (shows the shape) |
 | [`docs/sample-slack-digest.md`](docs/sample-slack-digest.md) | Example of the weekly Slack summary |
 | [`docs/salesforce-readonly-user-setup.md`](docs/salesforce-readonly-user-setup.md) | For your admin: read-only Salesforce login |
 | [`docs/google-docs-connector-request.md`](docs/google-docs-connector-request.md) | Optional: auto-updating account docs |
-| [`advanced/`](advanced/) | Optional technical/command-line route (most people skip this) |
+| [`advanced/`](advanced/) | Optional: extra client-side write-protection guardrail |
 
 ---
 
