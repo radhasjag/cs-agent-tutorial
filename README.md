@@ -1,8 +1,12 @@
-# Customer Success Agent — Claude Code Tutorial
+# Customer Success Agent — Claude Tutorial
 
-A walkthrough for building a **Customer Success monitoring agent** in [Claude Code](https://claude.com/claude-code). It watches your customer accounts across **Salesforce, Pendo, and the web**, then delivers a **prioritized weekly digest** to **Slack** — automatically, on a schedule.
+A simple, **no-code** way to set up a **Customer Success monitoring agent** in the
+[Claude desktop app](https://claude.com/download). It watches your customer accounts across
+**Salesforce, Pendo, and the web**, then delivers a **prioritized weekly summary** to
+**Slack** — automatically.
 
-> **Heads up:** This is a sanitized tutorial. Every ID, email, account name, and person in here is a **placeholder or fake example**. Swap in your own values where you see `<ANGLE_BRACKETS>` or `your-...`. Nothing in this repo is a secret — see [Security & privacy](#security--privacy).
+> **Built for non-technical users.** You set everything up by clicking **Connect** inside
+> Claude and signing in to your tools — no terminal, no commands. 👉 **Start with [SETUP.md](SETUP.md).**
 
 ---
 
@@ -10,158 +14,82 @@ A walkthrough for building a **Customer Success monitoring agent** in [Claude Co
 
 Once a week (we use **Thursdays at 2pm**), the agent:
 
-1. Pulls the team's active accounts and their **upcoming renewals + ARR** from Salesforce (read-only).
+1. Pulls your team's **upcoming renewals + ARR** from Salesforce (read-only).
 2. Checks **Pendo** for usage risk (accounts that have gone quiet).
 3. Searches the **web** for notable, business-relevant news per account.
-4. Pulls the **latest customer communication** (who / when / subject) from Salesforce.
-5. Compiles a **signal-only, prioritized digest** — not every account, only ones that need attention — and **DMs it to you in Slack**.
+4. Adds the **latest customer communication** (who / when / subject) from Salesforce.
+5. Sends a **signal-only, prioritized summary** to your **Slack DM** — not every account,
+   only the ones that need attention.
 
-"Signal-only" means an account appears **only if** it has: a renewal within 90 days, a usage-risk flag, or notable news. High-ARR renewals are always surfaced first.
+"Signal-only" means an account shows up **only if** it has: a renewal within 90 days, a
+usage-risk flag, or notable news. High-value renewals always come first.
 
----
-
-## Architecture
-
-```
-                ┌─────────────────────────────────────────────┐
-                │              Claude Code agent               │
-                │        (scheduled task, runs weekly)         │
-                └─────────────────────────────────────────────┘
-                   │          │            │            │
-          read-only│   read   │     web    │    send    │
-                   ▼          ▼            ▼            ▼
-            ┌───────────┐ ┌────────┐ ┌──────────┐ ┌──────────┐
-            │ Salesforce│ │ Pendo  │ │  Web     │ │  Slack   │
-            │  (MCP/CLI)│ │ (MCP)  │ │  search  │ │  (MCP)   │
-            │ renewals, │ │ usage  │ │  news    │ │  DM you  │
-            │ ARR, comms│ │ signal │ │          │ │          │
-            └───────────┘ └────────┘ └──────────┘ └──────────┘
-```
-
-Everything runs through Claude Code using **MCP connectors** (Salesforce, Pendo, Slack) plus built-in web search. No custom backend, no servers.
+See a sample: [docs/sample-slack-digest.md](docs/sample-slack-digest.md).
 
 ---
 
-## 👋 New here? Start with the Setup Guide
+## How it's built (plain version)
 
-**Not technical? No problem.** [**SETUP.md**](SETUP.md) is a step-by-step, copy-paste guide
-for **both Windows and Mac** that installs every tool (Claude Code, Node.js, Salesforce CLI,
-Git, GitHub CLI), explains what each one does, and links to official sources. Start there,
-then come back here for how the agent works.
+```
+        ┌──────────────────────────────────────────┐
+        │            Claude (desktop app)            │
+        │      runs your routine once a week         │
+        └──────────────────────────────────────────┘
+            │           │           │          │
+       read │      read │       web │     send │
+            ▼           ▼           ▼          ▼
+       Salesforce     Pendo      Web search   Slack
+       (connector)  (connector)              (connector)
+```
 
-## Prerequisites (all covered in [SETUP.md](SETUP.md))
-
-- **Claude Code** (desktop app or CLI)
-- **Node.js 18+**
-- **Salesforce CLI** (`@salesforce/cli`)
-- **Git** + **GitHub CLI** (only if you want to share this tutorial on GitHub)
-- Connectors authorized in Claude: **Salesforce**, **Pendo**, **Slack** (Google Drive optional — see [docs](docs/google-docs-connector-request.md))
+Everything plugs in through **Claude connectors** — secure links to tools your company
+already uses. You connect them with a click and a browser sign-in. The only tool that
+sometimes needs an extra step is Salesforce (see [SETUP.md](SETUP.md), Step 3).
 
 ---
 
-## Setup
+## Get started
 
-### 1. Install tooling
+👉 **[SETUP.md](SETUP.md)** — the 15-minute, click-by-click guide (Windows & Mac).
 
-```bash
-# Node.js (example via winget on Windows; use your platform's installer)
-winget install OpenJS.NodeJS.LTS
-
-# Salesforce CLI
-npm install --global @salesforce/cli
-```
-
-### 2. Authenticate Salesforce (read-only intent)
-
-```bash
-sf org login web --alias your-org-alias --set-default
-# verify
-sf data query --query "SELECT Id, Name FROM Account LIMIT 3" --target-org your-org-alias
-```
-
-### 3. Add the Salesforce MCP server
-
-Drop [`.mcp.json`](.mcp.json) in your project root. We lock it to a single **read-only** tool:
-
-```json
-{
-  "mcpServers": {
-    "salesforce": {
-      "command": "npx",
-      "args": ["-y", "@salesforce/mcp", "--orgs", "your-org-alias", "--tools", "run_soql_query"]
-    }
-  }
-}
-```
-
-### 4. Apply a client-side read-only guardrail
-
-[`.claude/settings.json`](.claude/settings.json) denies every Salesforce **write** command (create/update/delete/upsert/import, plus `apex run` / `org delete`) while allowing reads. This is a **local guardrail** — see [Read-only, done right](#read-only-done-right) for the airtight version.
-
-### 5. (Recommended) Org-enforced read-only Salesforce user
-
-A client-side guardrail is good; an org-enforced one is better. See [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md) for a runbook your Salesforce admin can follow (free API-only license + read-only permission set + JWT auth).
-
-### 6. Discover your Salesforce fields
-
-Field names differ per org. Use the Tooling API to find yours instead of guessing:
-
-```bash
-sf data query --use-tooling-api \
-  --query "SELECT QualifiedApiName, Label, DataType FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName='Opportunity' AND (Label LIKE '%ARR%' OR Label LIKE '%Renew%')" \
-  --target-org your-org-alias
-```
-
-> **Lesson we learned:** in our org the open renewal Opportunity's ARR field was empty — the real ARR lived on the *prior* contract, reachable via a `Renewed_From__c` lookup. And prebuilt "renewal in N days" checkboxes were unreliable; filtering on the actual `Renewal_Due_Date__c` was correct. **Validate against real records before trusting a field.**
-
-### 7. Match Pendo to Salesforce
-
-In our setup, **Pendo accounts are keyed by the Salesforce 18-char Account ID** — so matching is exact (no fuzzy name matching). The reliable "is this account going quiet?" signal was the `metadata.auto.lastvisit` field. Confirm the equivalent in your Pendo subscription.
-
-### 8. Create the weekly scheduled task
-
-Use Claude Code's scheduling to run the routine every Thursday at 2pm. The full, self-contained task prompt is in [examples/weekly-digest-task.md](examples/weekly-digest-task.md) — paste it in and adjust the placeholders.
+In short:
+1. Install the **Claude desktop app** and sign in.
+2. **Connect** Slack, Pendo, and Salesforce (and Google Drive if you want the docs extension).
+3. Paste the routine from [examples/weekly-digest-task.md](examples/weekly-digest-task.md) and
+   ask Claude to run it weekly.
 
 ---
 
-## Read-only, done right
+## Read-only by design
 
-This project treats "the agent must never write to our CRM" as a first-class requirement. Two layers:
-
-| Layer | What | Strength |
-|-------|------|----------|
-| MCP scope | Salesforce MCP limited to `run_soql_query` | Blocks writes via the connector |
-| Client guardrail | [`.claude/settings.json`](.claude/settings.json) deny rules | Blocks write commands in the shell |
-| **Org-enforced** | **Dedicated read-only user** ([runbook](docs/salesforce-readonly-user-setup.md)) | **The CRM itself refuses writes — strongest** |
-
-The first two are things you can do yourself today; the third is the audit-proof version and needs a Salesforce admin.
+This agent only ever **reads** your CRM — it should never change Salesforce data. The best
+way to guarantee that is to connect Salesforce with a **read-only login**. Ask your admin to
+set one up using [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md).
 
 ---
 
-## Repo contents
+## What's in this repo
 
 | Path | What |
 |------|------|
-| [`SETUP.md`](SETUP.md) | **Start here** — beginner setup for Windows & Mac |
-| [`.mcp.json`](.mcp.json) | Salesforce MCP config (read-only) |
-| [`.claude/settings.json`](.claude/settings.json) | Client-side write guardrail |
-| [`examples/accounts.sample.json`](examples/accounts.sample.json) | **Fake** account list (shape only) |
-| [`examples/weekly-digest-task.md`](examples/weekly-digest-task.md) | The scheduled task prompt |
-| [`docs/salesforce-readonly-user-setup.md`](docs/salesforce-readonly-user-setup.md) | Read-only SF user runbook |
-| [`docs/google-docs-connector-request.md`](docs/google-docs-connector-request.md) | (Optional) Drive editing connector spec |
-| [`docs/sample-slack-digest.md`](docs/sample-slack-digest.md) | Example digest output (fake data) |
+| [`SETUP.md`](SETUP.md) | **Start here** — click-by-click setup (no terminal) |
+| [`examples/weekly-digest-task.md`](examples/weekly-digest-task.md) | The routine instructions you give Claude |
+| [`examples/accounts.sample.json`](examples/accounts.sample.json) | **Fake** account list (shows the shape) |
+| [`docs/sample-slack-digest.md`](docs/sample-slack-digest.md) | Example of the weekly Slack summary |
+| [`docs/salesforce-readonly-user-setup.md`](docs/salesforce-readonly-user-setup.md) | For your admin: read-only Salesforce login |
+| [`docs/google-docs-connector-request.md`](docs/google-docs-connector-request.md) | Optional: auto-updating account docs |
+| [`advanced/`](advanced/) | Optional technical/command-line route (most people skip this) |
 
 ---
 
-## Security & privacy
+## Privacy
 
-- **No secrets in this repo.** No tokens, keys, org IDs, emails, customer names, or internal IDs. All such values are placeholders.
-- **The agent is read-only** against Salesforce by design (three layers above).
-- **Your real data stays local.** The actual account list, certificates, and credentials live on your machine and are **git-ignored** (see [`.gitignore`](.gitignore)) — never commit them.
-- If you fork this for your team, keep your real `accounts.json`, `certs/`, and any populated configs **out of version control**.
+This tutorial contains **no real data** — every name, account, and ID is a placeholder or
+fake example. Your real customer list and credentials stay inside your own Claude app and
+connected tools; nothing sensitive lives in this repo.
 
 ---
 
 ## License
 
-MIT — use it, fork it, adapt it for your team.
+MIT — use it, adapt it, share it with your team.

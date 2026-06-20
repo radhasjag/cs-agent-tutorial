@@ -1,68 +1,63 @@
-# Weekly Digest — Scheduled Task Prompt
+# Weekly Digest — Routine Instructions
 
-This is the self-contained prompt the Claude Code scheduled task runs each week
-(we schedule it for **Thursdays at 2pm**, cron `0 14 * * 4` in local time).
+These are the instructions you give Claude for the weekly routine. Paste the block below into
+Claude and ask it to run **every Thursday at 2pm**, delivering to your **Slack DM**.
 
-Replace every `<PLACEHOLDER>` with your own values before using:
+Claude uses your connected tools automatically — your **Salesforce connector** runs the
+queries, your **Pendo connector** checks usage, web search finds news, and your **Slack
+connector** sends the message. No commands to type.
 
-- `<CS_MANAGER_1>`, `<CS_MANAGER_2>`, ... — names of the CS managers (your direct reports) as they appear in your CRM's owner field
-- `<YOUR_PENDO_SUB_ID>`, `<YOUR_PENDO_APP_ID>` — from your Pendo connector
-- `<YOUR_SLACK_DM_CHANNEL_ID>` — the Slack DM channel to deliver to
-- `your-org-alias` — your Salesforce CLI org alias
-- Field API names (e.g. `Vertical_Owner_Name__c`, `Renewed_From__c`, `Renewal_Due_Date__c`) — **discover yours** with the FieldDefinition query in the README; ours will differ from yours
+**Before using, replace the `<PLACEHOLDERS>`:**
+
+- `<CS_MANAGER_1>`, `<CS_MANAGER_2>`, ... — the names of your CS managers (your direct reports)
+  as they appear in Salesforce's "owner" field
+- `<YOUR_SLACK_DM>` — your Slack direct message (Claude can find it from your name)
+- Field names like `Vertical_Owner_Name__c`, `Renewed_From__c`, `Renewal_Due_Date__c` differ
+  per Salesforce org — ask Claude to **find your org's equivalents** if these don't match
 
 ---
 
 ```
-You are a Customer Success monitoring agent. Produce a PRIORITIZED, SIGNAL-ONLY weekly
-digest and deliver it as a Slack DM. Do NOT list every account — only those with a real
-signal this week.
+You are my Customer Success monitoring agent. Produce a PRIORITIZED, SIGNAL-ONLY weekly
+summary and send it to my Slack DM (<YOUR_SLACK_DM>). Do NOT list every account — only the
+ones with a real signal this week.
 
-ROLES (do not confuse):
-- CS Manager = your direct report = CRM "owner" field. PRIMARY grouping.
-- Account Manager = CRM Account Owner = a different person. Secondary context only.
+Use my connected tools: the Salesforce connector (READ-ONLY — only run queries, never change
+data), the Pendo connector, web search, and the Slack connector.
 
-ACCOUNT UNIVERSE: the team's active accounts (from your account list / CRM query).
-Salesforce is READ-ONLY: only run `sf data query` — never create/update/delete.
+ROLES (don't confuse): CS Manager = my direct report = the Salesforce "owner" field (PRIMARY
+grouping). Account Manager = the Salesforce Account Owner = a different person (secondary).
 
 INCLUDE an account ONLY if it has >=1 signal:
 (1) renewal <=90 days, (2) usage risk, or (3) notable business-relevant news.
 
-STEP 0 — Get account IDs (needed to match Pendo):
-  sf data query --query "SELECT Id, Name, <CS_MANAGER_FIELD>, Owner.Name, Status__c
-    FROM Account WHERE <CS_MANAGER_FIELD> IN ('<CS_MANAGER_1>','<CS_MANAGER_2>')
-    AND Status__c='Active'" --target-org your-org-alias
+1) RENEWALS <=90 DAYS — via the Salesforce connector, run this SOQL (ARR comes from the prior
+   contract through the renewal's Renewed_From link; the open renewal's own ARR is usually
+   blank, and the prebuilt "renewal in N days" checkboxes are unreliable — use the date):
+     SELECT Account.Name, Account.Vertical_Owner_Name__c, Account.Owner.Name,
+            Renewal_Due_Date__c, Renewed_From__r.AUTO_Annual_Recurring_Revenue__c
+     FROM Opportunity
+     WHERE IsClosed=false AND Type='Renewal'
+       AND Renewal_Due_Date__c>=TODAY AND Renewal_Due_Date__c<=NEXT_N_DAYS:90
+       AND Account.Vertical_Owner_Name__c IN ('<CS_MANAGER_1>','<CS_MANAGER_2>')
+     ORDER BY Renewed_From__r.AUTO_Annual_Recurring_Revenue__c DESC NULLS LAST
 
-STEP 1 — Renewals <=90 days (Salesforce). ARR comes from the PRIOR contract via the
-renewal's Renewed_From lookup (the open renewal opp's own ARR is often null). Filter on
-the real renewal date, not prebuilt "renewal in N days" checkboxes:
-  sf data query --query "SELECT Account.Name, Account.<CS_MANAGER_FIELD>, Account.Owner.Name,
-    Renewal_Due_Date__c, Renewed_From__r.<ARR_FIELD>
-    FROM Opportunity WHERE IsClosed=false AND Type='Renewal'
-    AND Renewal_Due_Date__c>=TODAY AND Renewal_Due_Date__c<=NEXT_N_DAYS:90
-    AND Account.<CS_MANAGER_FIELD> IN ('<CS_MANAGER_1>','<CS_MANAGER_2>')
-    ORDER BY Renewed_From__r.<ARR_FIELD> DESC NULLS LAST" --target-org your-org-alias
+2) USAGE RISK (Pendo) — Pendo accounts are keyed by the Salesforce Account ID. For each active
+   account, check the account's last-visit date. Flag USAGE RISK if there's been no visit in
+   ~60 days (or no usage data at all).
 
-STEP 2 — Usage risk (Pendo). subId="<YOUR_PENDO_SUB_ID>", appId="<YOUR_PENDO_APP_ID>".
-Pendo accounts are keyed by the Salesforce Account Id. For each active account call
-accountQuery(accountId=<SF Id>, select=["metadata.salesforce.name","metadata.auto.lastvisit"]).
-lastvisit is epoch milliseconds. Flag USAGE RISK if lastvisit is null or older than ~60 days.
+3) NEWS (web search) — for each account, find notable recent (~7 days) business news:
+   expansions, new facilities, capital investment, funding/grants, policy, layoffs, M&A, major
+   events. Skip accounts with nothing notable.
 
-STEP 3 — News (web search). For each account, search recent (~7 days) business-relevant
-news (expansions, new facilities, capital investment, funding/grants, policy, layoffs, M&A,
-major events). Skip accounts with nothing notable.
+4) LATEST COMMUNICATION — for each INCLUDED account, get the most recent Salesforce activity
+   (who / when / subject of the last touch).
 
-STEP 4 — Latest communication, for INCLUDED accounts only:
-  sf data query --query "SELECT Subject, ActivityDate, TaskSubtype, Owner.Name
-    FROM Task WHERE AccountId='<ACCOUNT ID>' ORDER BY ActivityDate DESC NULLS LAST LIMIT 1"
-    --target-org your-org-alias
+5) COMPILE & PRIORITIZE: high-ARR renewals <=90 days first (always), then other renewals by
+   ARR, then usage-risk, then news-only. Group under each CS Manager. For each account show:
+   CS Manager + Account Manager + status; renewal date & ARR (if any); usage-risk (if any);
+   news one-liner + link + why-it-matters (if any); last touch (subject / who / date).
 
-STEP 5 — Compile & PRIORITIZE: high-ARR renewals <=90 days first (always), then other
-renewals by ARR, then usage-risk, then news-only. Group under each CS Manager. Per account
-show: CS Manager + Account Manager + status; renewal date & ARR (if any); usage-risk (if any);
-news one-liner + source link + why-it-matters (if any); last touch (subject / who / date).
-
-STEP 6 — Deliver: send the digest as a Slack DM to channel_id "<YOUR_SLACK_DM_CHANNEL_ID>".
-If NO account has any signal, send a brief "All quiet this week" message instead.
-After sending, report counts + the Slack message link.
+6) SEND the summary to my Slack DM (<YOUR_SLACK_DM>). If NO account has any signal, send a
+   short "All quiet this week" message instead.
 ```

@@ -1,175 +1,96 @@
-# Setup Guide (Windows & Mac)
+# Setup Guide — Claude Desktop (no coding)
 
-**No coding experience needed.** This walks you through installing a few free tools and
-connecting them, so you can run the Customer Success agent and (optionally) share this
-tutorial on GitHub. Plan for about **30–45 minutes**. You'll mostly **copy a command,
-paste it, and press Enter**.
+**You won't touch a terminal.** Everything here is done by clicking inside the **Claude
+desktop app** and signing in to your tools through your browser. Plan for about **15–20
+minutes**.
 
-> 💡 If a command ever says something like *"command not found"*, the most common fix is to
-> **close the Terminal window and open a new one**, then try again. (Newly installed tools
-> only appear in fresh windows.)
+Works the same on **Windows and Mac**.
 
 ---
 
-## What you'll install and why
+## What you need
 
-| Tool | What it's for | Plain-English description |
-|------|---------------|---------------------------|
-| **Claude Code** | Runs the agent | The Anthropic app that does the work and talks to your tools |
-| **Node.js** | Required engine | A free runtime that the Salesforce tools need to run |
-| **Salesforce CLI** | Read Salesforce | Lets the agent securely read your CRM data (read-only) |
-| **Git** | Version control | Tracks files; needed to publish to GitHub |
-| **GitHub CLI** | Publish/share | The easiest way to put this tutorial on GitHub |
-
-You only need **Git** and **GitHub CLI** if you want to *share* the tutorial. For just
-running the agent, you need Claude Code + Node.js + Salesforce CLI.
+- A work computer (Windows or Mac)
+- Your normal work logins (Salesforce, Slack, Pendo, Google) — you'll just click "Connect"
+  and sign in as usual
+- About 15 minutes
 
 ---
 
-## Step 0 — Open your Terminal
+## Step 1 — Install the Claude desktop app
 
-The "Terminal" is a window where you type commands.
+1. Go to 👉 **https://claude.com/download**
+2. Download the app for your computer (Windows or Mac) and install it.
+3. Open Claude and **sign in with your work account**.
 
-- **Windows:** Click **Start**, type **PowerShell**, press **Enter**.
-- **Mac:** Press **Cmd + Space**, type **Terminal**, press **Enter**.
-
-Keep this window open — you'll paste commands into it throughout.
-
----
-
-## Step 1 — Install Claude Code
-
-The app that runs everything. Download and install it from the official page:
-- 👉 **https://claude.com/claude-code**
-- Docs / help: https://docs.claude.com/en/docs/claude-code
+> Help & docs: https://docs.claude.com/en/docs/claude-code
 
 ---
 
-## Step 2 — Install Node.js (the "engine")
+## Step 2 — Connect your tools (the easy part)
 
-Pick the **LTS** (Long-Term Support) version.
+Most of your tools are **org-provided connectors** — they're already available inside Claude,
+you just turn them on:
 
-**Easiest (any skill level):** download the installer and double-click it:
-- 👉 **https://nodejs.org** → click the **LTS** button → run the installer → click Next/Finish.
+1. In Claude, open **Settings → Connectors** (sometimes shown as "Connectors" or "Add
+   connectors").
+2. Look for these and click **Connect** on each, then sign in through your browser when asked:
+   - **Slack** — where your weekly summary gets delivered
+   - **Pendo** — product-usage signals (spotting accounts going quiet)
+   - **Google Drive** — *(optional)* only if you want the account-docs extension later
+3. That's it for these three — no setup files, no commands.
 
-**Or, by command:**
-
-- **Windows (PowerShell):**
-  ```powershell
-  winget install OpenJS.NodeJS.LTS
-  ```
-- **Mac (if you use Homebrew):**
-  ```bash
-  brew install node
-  ```
-
-**Check it worked** (open a NEW Terminal window first):
-```bash
-node --version
-```
-You should see something like `v20.x` or `v24.x`.
+> What's a connector? It's a secure, pre-approved link between Claude and a tool your company
+> already uses. Learn more: https://docs.claude.com/en/docs/claude-code/mcp
 
 ---
 
-## Step 3 — Install the Salesforce CLI
+## Step 3 — Add Salesforce
 
-This is what lets the agent read your Salesforce data. Same command on both Windows and Mac:
-```bash
-npm install --global @salesforce/cli
-```
-**Check it worked:**
-```bash
-sf --version
-```
-- Learn more: https://developer.salesforce.com/tools/salesforcecli
+Salesforce is the **one** tool that often isn't preconnected. Easiest options, in order:
 
-**Connect your Salesforce org** (opens your browser to log in):
-```bash
-sf org login web --alias your-org-alias --set-default
-```
+1. **Check your Connectors list first** (Step 2) — your org may already offer a **Salesforce**
+   connector. If it's there, just **Connect** and sign in. Done.
+2. **If it's not there**, ask your **Salesforce admin** to enable Salesforce's **Hosted MCP
+   connector** for Claude (it's a sign-in link — no install on your side). Official guide:
+   👉 https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/claude.html
+3. **Ask for read-only access.** For this routine, Claude only needs to *read* Salesforce.
+   Request that the connection use a **read-only** Salesforce login so it can never change
+   your CRM data. (Details your admin can follow: [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md).)
 
----
-
-## Step 4 — Install Git (only needed to share on GitHub)
-
-Git tracks file versions and is required to publish to GitHub.
-
-**Easiest:** download the installer:
-- 👉 **https://git-scm.com/downloads** → choose your OS → run installer → accept the defaults.
-
-**Or, by command:**
-
-- **Windows (PowerShell):**
-  ```powershell
-  winget install Git.Git
-  ```
-- **Mac:** Git often comes with Apple's developer tools. Trigger the install with:
-  ```bash
-  xcode-select --install
-  ```
-  (or `brew install git` if you use Homebrew)
-
-**Check it worked** (new Terminal window):
-```bash
-git --version
-```
+> A more technical, install-it-yourself Salesforce option exists if you ever need it — see
+> [`advanced/`](advanced/). Most people won't.
 
 ---
 
-## Step 5 — Install GitHub CLI (only needed to share on GitHub)
+## Step 4 — Create your weekly routine
 
-The simplest way to create and upload a GitHub repository.
+No code — you just tell Claude what you want and it sets up a recurring task.
 
-- **Windows (PowerShell):**
-  ```powershell
-  winget install GitHub.cli
-  ```
-- **Mac (Homebrew):**
-  ```bash
-  brew install gh
-  ```
-- **Or** download from 👉 **https://cli.github.com**
+1. Open [`examples/weekly-digest-task.md`](examples/weekly-digest-task.md) and copy the
+   instructions inside (fill in the few `<PLACEHOLDERS>` — like your CS managers' names and
+   your Slack DM).
+2. In Claude, paste them and say something like:
 
-You'll also need a free GitHub account: https://github.com/signup
+   > "Run these instructions every **Thursday at 2pm** and send the result to my Slack DM."
 
-**Sign in** (opens your browser — just follow the prompts):
-```bash
-gh auth login
-```
-
----
-
-## Step 6 — Connect your tools inside Claude
-
-Inside Claude Code, connect the services the agent reads from — **Salesforce**, **Pendo**,
-and **Slack** — using Claude's connectors/MCP settings. Claude will guide you through
-authorizing each one in your browser.
-- Learn more: https://docs.claude.com/en/docs/claude-code/mcp
-
----
-
-## Step 7 — Create the weekly routine
-
-You don't write code for this — you just tell Claude what you want. For example:
-
-> "Every Thursday at 2pm, run the customer success digest and send it to my Slack DM."
-
-Use the ready-made instructions in [`examples/weekly-digest-task.md`](examples/weekly-digest-task.md)
-as the routine's prompt (swap in your own placeholders first). Claude saves it as a scheduled
-task that runs automatically.
+3. Claude saves it as a **scheduled routine** that runs automatically.
 
 > ℹ️ The routine runs while the Claude app is open. If the app is closed when it's due, it
 > runs the next time you open it.
 
+**That's the whole setup.** Each week you'll get a prioritized summary in Slack — only the
+accounts that need attention.
+
 ---
 
-## Helpful background (optional reading)
+## Optional extensions (skip unless you want them)
 
-- What is a Terminal / command line? https://www.freecodecamp.org/news/command-line-for-beginners/
-- What is Git & GitHub (beginner video & guide): https://docs.github.com/en/get-started/start-your-journey
-- What is Node.js? https://nodejs.org/en/about
-- Windows package manager (winget): https://learn.microsoft.com/windows/package-manager/winget/
-- Homebrew for Mac (optional): https://brew.sh
+- **Read-only Salesforce login** (recommended for peace of mind) — have your admin set it up:
+  [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md)
+- **Auto-updating account docs in Google Drive** — needs an edit-capable Drive connector:
+  [docs/google-docs-connector-request.md](docs/google-docs-connector-request.md)
+- **Technical / command-line route** (not needed for the above): [`advanced/`](advanced/)
 
 ---
 
@@ -177,7 +98,7 @@ task that runs automatically.
 
 | Problem | Fix |
 |---------|-----|
-| `command not found` / `not recognized` | Close the Terminal and open a **new** window, then retry. Newly installed tools only show up in fresh windows. |
-| Windows: still not found after reopening | Sign out and back in to Windows (refreshes the system PATH). |
-| `npm install --global` permission error on Mac | Try again with `sudo npm install --global @salesforce/cli` and enter your Mac password. |
-| Not sure which Terminal to use | Windows → **PowerShell**; Mac → **Terminal**. Both work for every command above. |
+| A connector (Slack/Pendo/Salesforce) isn't in my list | It may not be enabled for your org yet — ask your IT/admin to turn it on. |
+| The connector won't sign in | Make sure you're using your **work** account, and that pop-ups/redirects aren't blocked. |
+| The routine didn't run | The Claude app needs to be open at the scheduled time; it'll run next time you open it. |
+| I want to change the day/time | Just tell Claude, e.g. "change my weekly digest to Mondays at 9am." |
