@@ -1,12 +1,17 @@
-# Customer Success Agent - Claude Tutorial
+# Customer Success Agent - a Claude Playbook
 
-A simple, **no-code** way to set up a **Customer Success monitoring agent** in the
-[Claude desktop app](https://claude.com/download). It watches your customer accounts across
-**Salesforce, Pendo, and the web**, then publishes a **prioritized weekly dashboard** and
-pings you in **Slack** - automatically.
+A **no-code** way to set up a **Customer Success monitoring agent** in the
+[Claude desktop app](https://claude.com/download) - and the documented playbook behind it: not
+just the setup steps, but why each choice was made, what broke running it for real, and what's
+next. It watches your customer accounts across **Salesforce, Pendo, and the web**, then publishes
+a **prioritized weekly dashboard** and pings you in **Slack** - automatically.
 
-> **Built for non-technical users.** You set everything up by clicking **Connect** inside
-> Claude and signing in to your tools - no terminal, no commands. Start with [SETUP.md](SETUP.md).
+> **Want to just run it?** Everything below still works as a **click-through, no-code setup** -
+> no terminal, no commands. Start with [SETUP.md](SETUP.md).
+>
+> **Want the reasoning?** See [Results & Impact](#results--impact) below, then
+> [docs/design-decisions.md](docs/design-decisions.md) and
+> [docs/iteration-notes.md](docs/iteration-notes.md).
 
 ---
 
@@ -28,7 +33,43 @@ Once a week (we use **Thursdays at 2pm**), the agent:
 "Signal-only" means an account shows up **only if** it has: a renewal within 90 days, a
 usage-risk flag, or notable news. High-value renewals always come first.
 
-See a sample: [docs/sample-digest.md](docs/sample-digest.md).
+See a sample: [docs/sample-slack-digest.md](docs/sample-slack-digest.md).
+
+---
+
+## Results & Impact
+
+This has been running as a real weekly routine - not a demo - since June 2026, against an active,
+multi-account CS book.
+
+**What it replaced:** a manual weekly pass across every account, cross-referencing a CRM, a
+usage-analytics tool, and outside news by hand, then writing up a summary - repeated every week,
+for every account, regardless of whether anything had actually changed.
+
+**What changed:**
+
+- **From "review everything" to "review what needs it."** The digest only surfaces accounts with
+  an actual signal (renewal within 90 days, usage risk, or notable news) - on a quiet week that's
+  a short list, and the rest of the book is confirmed fine automatically instead of re-checked by
+  hand. *(Fill in your own before/after here - e.g. "cut the accounts needing a manual look each
+  week from `<full book size>` to `<typical signal count>`.")*
+- **Caught things a manual process had been missing.** Running this for real surfaced real gaps
+  before they became a problem - see [docs/iteration-notes.md](docs/iteration-notes.md) for
+  specifics: a name change that had been silently dropping a manager's entire book from view,
+  usage-risk false positives from accounts used indirectly through a partner or child account,
+  and a field mapping that had quietly misattributed a relationship owner. None of these were
+  visible until the routine's output was checked against reality - which is itself an argument
+  for automating the monitoring, not just the summarizing.
+- **Multi-source correlation on autopilot.** Every signal account gets renewal timing, usage
+  trend, external news, and last-touch context assembled automatically each week - the kind of
+  cross-referencing that quietly stops happening by hand the first busy week.
+- **Resilient by design.** When a data source is temporarily unreachable, the routine still runs
+  and flags what it couldn't check, rather than failing outright or silently omitting it (see
+  [docs/iteration-notes.md](docs/iteration-notes.md), item 2).
+
+*(The numbered placeholders above are meant to be filled in with your own figures if you adapt
+this - time saved per week, accounts covered, issues caught. The structural wins don't depend on
+disclosing any of that to be true.)*
 
 ---
 
@@ -94,10 +135,12 @@ set one up using [docs/salesforce-readonly-user-setup.md](docs/salesforce-readon
 | Path | What |
 |------|------|
 | [SETUP.md](SETUP.md) | **Start here** - step-by-step setup (mostly click-based) |
+| [docs/design-decisions.md](docs/design-decisions.md) | Why each choice was made, and what was rejected |
+| [docs/iteration-notes.md](docs/iteration-notes.md) | What broke running this for real, and what's next |
 | [salesforce/salesforce-mcp-config.json](salesforce/salesforce-mcp-config.json) | Salesforce MCP config (read-only) - used in SETUP Step 3 |
 | [examples/weekly-digest-task.md](examples/weekly-digest-task.md) | The routine instructions you give Claude |
 | [examples/accounts.sample.json](examples/accounts.sample.json) | **Fake** account list (shows the shape) |
-| [docs/sample-digest.md](docs/sample-digest.md) | Example of the weekly Slack summary and dashboard |
+| [docs/sample-slack-digest.md](docs/sample-slack-digest.md) | Example of the weekly Slack summary and dashboard |
 | [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md) | For your admin: read-only Salesforce login |
 | [advanced/](advanced/) | Optional: extra client-side write-protection guardrail |
 
