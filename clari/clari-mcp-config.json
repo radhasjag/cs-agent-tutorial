@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "clari": {
+      "command": "node",
+      "args": ["/absolute/path/to/clari-mcp-server/index.js"],
+      "env": {
+        "CLARI_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}

@@ -39,21 +39,86 @@ Two layers enforce this:
 a task or note). That stays a human action - deliberately, since anything that mutates a system
 of record should have a person deciding to do it.
 
+**Zendesk and Clari get the read-only guarantee more directly than Salesforce did at first.**
+Their custom MCP servers (see
+[adding-a-custom-source.md](adding-a-custom-source.md)) simply never define a write tool for
+create/update/delete/bulk-import endpoints - there's no permission layer needed to block what
+was never exposed in the first place. Salesforce's belt-and-suspenders
+[`advanced/`](../advanced/) guardrail exists because that connector is a general-purpose CLI
+wrapper capable of writes in principle; a from-scratch server with a narrow, named tool list
+doesn't have that exposure to begin with.
+
 ---
 
 ## Why these specific sources, and not others
 
 | Source | What it answers |
 |---|---|
-| Salesforce | "When do I need to act?" - renewals, ARR, last touch |
+| Salesforce | "When do I need to act?" - renewals, ARR, last touch, internal handoff notes |
 | Pendo | "Are they actually using it?" - usage, a signal Salesforce can't give you |
+| Zendesk | "Are they struggling?" - support-ticket volume, open count, category mix |
+| Clari *(optional)* | "What does the forecast say?" - pipeline/forecast context on open opportunities |
 | Web search | "What's happening around them?" - news, published studies, neither system has |
 | Slack | Where the CS team already works - no new tool to check |
 | Tability *(optional)* | Keeps an existing OKR check-in current, for teams already tracking health as a goal |
 
-**Rejected (for now):** a support-ticket source (e.g., Zendesk). Considered for v1, deferred:
-better to prove the pattern out across four sources than add a fifth before the core loop was
-solid. Candidate for v2; see [iteration-notes.md](iteration-notes.md).
+Zendesk and Clari were both **deferred out of v1** on purpose - better to prove the pattern out
+across four sources before adding a fifth and sixth. Both shipped in v2, below, once the core
+loop was solid and API access existed for each.
+
+---
+
+## Why add Zendesk after all
+
+v1 deferred a support-ticket source. It got added once Zendesk API access existed, because
+"are they actually using it and are they struggling with it" turned out to be two different
+questions that Pendo alone couldn't answer - a dormant Pendo account and a account drowning in
+support tickets look nothing alike, but both are risk.
+
+**What made it in:** ticket count for the year, open-ticket count, and a rough category
+split (billing / project-or-usage-question / software-bug / misc).
+
+**What got dropped: CSAT.** Two reasons. First, the bulk satisfaction-ratings endpoint returned
+a permissions error on the API token available - not something fixable from this side without a
+higher-privilege account. Second, and more fundamental: on the actual ticket volume seen,
+`priority` was essentially unset on nearly every ticket anyway, so a "highest priority" tile
+would have been reporting a mostly-empty field as if it were signal. **Rule applied throughout
+this project: if a field is unreliable or unavailable, drop it from the UI - don't show a
+metric that looks precise but is actually mostly blank or unauthorized.**
+
+**How matching works, and why it changed:** the obvious approach - match tickets to accounts via
+the support desk's own organization field - looked right and turned out to be wrong: a live
+sample found the vast majority of tickets simply weren't tagged to an organization at all,
+because most support volume came through channels (web widget, chat) that don't auto-populate
+it. Switched to matching by **email domain** instead - derive each account's domain(s) from its
+Salesforce contacts, then match tickets by requester email domain. This is a source-agnostic
+lesson worth generalizing: **don't trust a system's own "obvious" foreign key without sampling
+it first** - see [iteration-notes.md](iteration-notes.md) for the numbers.
+
+**A domain can belong to more than one account** (large organizations with several accounts on
+the same email domain - think multiple divisions or agencies under one umbrella). Rather than
+skip those or silently double-count, they're **flagged** with a "shared with N other accounts"
+note wherever it shows up, so the number is visible with its caveat attached instead of hidden.
+
+---
+
+## Why Clari, and why it's optional
+
+Clari (or an equivalent forecast/pipeline tool) answers a question none of the other sources
+can: what does the forecast actually say about this account's open pipeline, independent of
+what's logged in the CRM record itself. It's kept **optional and read-only, on the account
+detail view only** - it does not drive urgency tiering. Reasons:
+
+- No official MCP connector exists for it, so - like Salesforce and Zendesk - it needed the same
+  custom-server treatment (see
+  [adding-a-custom-source.md](adding-a-custom-source.md)). Not every team will want to do that
+  setup step for a nice-to-have signal, so the whole routine is designed to work with it absent.
+- Forecast data is a different kind of signal than "is this account at risk" - it's useful
+  context for a conversation, not itself a renewal-risk or usage-risk flag. Folding it into the
+  urgency tiers would have conflated two different judgments.
+- The tool's write/ingest endpoints (bulk account or opportunity upload) were deliberately never
+  wired up - same read-only principle as everywhere else in this project, applied even though
+  nothing here forced the choice.
 
 ---
 
@@ -70,6 +135,35 @@ something is actually happening. Exception-based, not calendar-based.
 **Tradeoff accepted:** this requires trusting the signal thresholds (what counts as "usage risk,"
 what renewal window matters). Those got tuned after real use - see
 [iteration-notes.md](iteration-notes.md).
+
+---
+
+## Why we walked back signal-only
+
+This is the most important reversal in this project, and it happened for a concrete reason, not
+a change of taste.
+
+A usage-data refresh, run purely to fill in a few known Watch-tier cards, surfaced over a dozen
+accounts with a genuine usage-risk signal that had never appeared in a single digest - because
+signal-only filtering, working exactly as designed, had been silently excluding them every week.
+They weren't wrong or edge cases; they simply hadn't tripped the specific thresholds the filter
+checked for that week they were checked, and once excluded, an account had no path back into
+view unless someone happened to re-run that specific check. **A filter that hides "nothing to
+report" cannot be distinguished, by the person reading the output, from a filter that is
+silently dropping things it should have caught.** Both look like a quiet week.
+
+**What changed:** every active account gets reviewed every run, full stop. Accounts with
+genuinely nothing to report land in a fourth, neutral, **collapsed-by-default** "Rest of
+Accounts" group - still there, still searchable, just not competing for attention with the
+tiers that need it. The three urgency tiers keep their exact original meaning; nothing about
+them changed except that "no signal" now means "confirmed and shown as such," not "left out."
+
+**Tradeoff accepted:** every run now has to actually check every account, every source, instead
+of stopping early once something doesn't need investigating - more work per run, done in
+exchange for the output being a true statement about the whole book instead of a curated subset
+of it. For a weekly-cadence tool reviewing a few hundred accounts, that cost is worth paying;
+it might not be at a much larger scale, where a genuinely stronger case for filtering would
+need better observability into what's being filtered out, not just a shorter list.
 
 ---
 
@@ -97,3 +191,38 @@ A new link every week means old links go stale and nobody's sure which one is cu
 redeploy to one fixed address on every run. This added a step to get right during setup (see
 [iteration-notes.md](iteration-notes.md) - it broke once) - but the tradeoff is a link people can
 bookmark once and never have to re-share.
+
+---
+
+## Why a Heat Map tab, on top of the 360 Account View
+
+The original single-view dashboard already showed everything a signal account needed - but only
+for signal accounts, and only the fields relevant to why it was flagged. As more sources got
+added, "everything about this account" stopped fitting cleanly into a signal card, and the team
+using the dashboard directly (not just the person receiving the weekly digest) wanted to click
+into *any* account, flagged or not, and see the full picture: Salesforce, Pendo, Zendesk,
+Chatter notes, forecast context, all in one panel.
+
+Rather than keep stretching the 360 Account View's card format to fit more sources, a second tab
+was added with its own layout suited to that job - a full-book color grid plus an expandable
+per-account panel. Same underlying data, different presentation for a different question ("show
+me this one account, completely" vs. "show me what needs attention this week").
+
+**Tradeoff accepted:** two tabs to maintain instead of one, and some data now gets fetched and
+rendered in two different shapes. Accepted because the two tabs genuinely answer different
+questions - collapsing them back into one view would mean compromising one or the other.
+
+---
+
+## Why the report catalogs are separate artifacts, not baked into the dashboard
+
+Two companion catalogs - a searchable index of published studies that used the product, and a
+searchable index of reports done with competitor tools - get cross-referenced from the Heat
+Map's per-account panel (surfacing "has this account, or one like it, published something using
+us or a competitor") but are built and refreshed as their **own** artifacts, not folded directly
+into the CS dashboard's data pipeline.
+
+Reasoning: their source (a running Slack channel of shared reports, in this project's case) and
+audience (also useful to sales/marketing, not just CS) are different enough that coupling their
+refresh cadence and failure modes to the CS dashboard's would make both harder to reason about.
+Cross-referencing them from the account panel gets the value without the coupling.

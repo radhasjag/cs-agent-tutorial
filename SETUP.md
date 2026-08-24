@@ -1,9 +1,11 @@
 # Setup Guide — Claude Desktop
 
-**Almost everything is done by clicking inside the Claude desktop app.** One tool —
-**Salesforce** — needs a short, one-time technical setup (about 10 minutes). If you'd rather
-not do that part, it's the single piece you can hand to a technical teammate or IT — the rest
-you can do yourself. Plan for about **20–30 minutes** total.
+**Almost everything is done by clicking inside the Claude desktop app.** Salesforce needs a
+short, one-time technical setup (about 10 minutes) — Zendesk and Clari need the same kind of
+setup too, but they're **optional** and can be added later. If you'd rather not do the
+technical part, it's the piece you can hand to a technical teammate or IT — the rest you can do
+yourself. Plan for about **20–30 minutes** for the core setup (Salesforce + Pendo + Slack); add
+10 minutes each, whenever you're ready, for Zendesk and Clari.
 
 Works the same on **Windows and Mac**.
 
@@ -14,8 +16,10 @@ Works the same on **Windows and Mac**.
 - A work computer (Windows or Mac)
 - Your normal work logins (Salesforce, Slack, Pendo, Google) — you'll click "Connect" and
   sign in as usual
-- For the Salesforce step only: the ability to install a free tool on your computer (or a
-  teammate/IT who can do that one step)
+- For the Salesforce step (and Zendesk/Clari, if you add them): the ability to install a free
+  tool on your computer (or a teammate/IT who can do that step), plus an API token from each
+  tool (Zendesk: Admin Center → Apps and integrations → APIs; Clari: Account Settings → API
+  Token) if you're adding those
 
 ---
 
@@ -88,6 +92,30 @@ to set up a **read-only Salesforce login**:
 
 ---
 
+## Step 3b — Add Zendesk and Clari (optional, do this whenever you're ready)
+
+Neither has a ready-made connector either, so each follows the **same pattern** as Salesforce,
+just with no CLI package to install — you (or your technical teammate) write a short local
+script instead. The full generic recipe, with a code template, is in
+[docs/adding-a-custom-source.md](docs/adding-a-custom-source.md). In short, for each tool:
+
+1. Get an API token (Zendesk: Admin Center → Apps and integrations → APIs → Zendesk API →
+   generate a token for your own login; Clari: Account Settings → API Token — copy it
+   immediately, it can't be viewed again).
+2. Build the small local server following
+   [docs/adding-a-custom-source.md](docs/adding-a-custom-source.md) - a handful of read-only
+   tools, no write/create/delete/bulk-import endpoints wired up.
+3. Add the entry to the same `claude_desktop_config.json` from Step 3d, using
+   [`zendesk/zendesk-mcp-config.json`](zendesk/zendesk-mcp-config.json) or
+   [`clari/clari-mcp-config.json`](clari/clari-mcp-config.json) as the template - fill in your
+   own subdomain/token, point `args` at wherever you saved the script, then restart Claude.
+
+**Skip this step entirely if you don't have API access to Zendesk or Clari yet** - the weekly
+routine works fine with just Salesforce + Pendo, and you can add either tool later without
+redoing anything else.
+
+---
+
 ## Step 4 — Create your weekly routine
 
 No code — you just tell Claude what you want and it sets up a recurring task.
@@ -104,18 +132,23 @@ No code — you just tell Claude what you want and it sets up a recurring task.
 > ℹ️ The routine runs while the Claude app is open. If the app is closed when it's due, it
 > runs the next time you open it.
 
-**That's the whole setup.** Each week you'll get a prioritized summary in Slack — only the
-accounts that need attention.
+**That's the whole setup.** Each week you'll get a Slack ping and a dashboard covering your
+whole book — see [README.md](README.md#three-views-one-dashboard) for what the dashboard's
+three tabs each show.
 
 ---
 
 ## Optional extensions (skip unless you want them)
 
+- **Zendesk and Clari** — see Step 3b above; add whenever you have API access to either.
 - **Read-only Salesforce login** (recommended for peace of mind) — have your admin set it up:
   [docs/salesforce-readonly-user-setup.md](docs/salesforce-readonly-user-setup.md)
 - **Auto-updating account docs in Google Drive** — needs an edit-capable Drive connector:
   [docs/google-docs-connector-request.md](docs/google-docs-connector-request.md)
 - **Extra Salesforce write-protection** (a client-side guardrail, on top of read-only): [`advanced/`](advanced/)
+- **Report catalogs** (published studies / competitor-tool reports, cross-referenced from the
+  Heat Map tab) — optional, built the same no-code way; ask Claude to set one up from a Slack
+  channel or spreadsheet of reports if useful to your team.
 
 ---
 
@@ -127,3 +160,5 @@ accounts that need attention.
 | The connector won't sign in | Make sure you're using your **work** account, and that pop-ups/redirects aren't blocked. |
 | The routine didn't run | The Claude app needs to be open at the scheduled time; it'll run next time you open it. |
 | I want to change the day/time | Just tell Claude, e.g. "change my weekly digest to Mondays at 9am." |
+| A Zendesk/Clari tool call fails with an auth error | Double-check the token in `claude_desktop_config.json`'s `env` block, and that you restarted Claude after editing it. |
+| I don't have Zendesk/Clari access yet | Skip Step 3b entirely — everything else works without them. |

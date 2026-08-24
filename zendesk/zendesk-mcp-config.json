@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "zendesk": {
+      "command": "node",
+      "args": ["/absolute/path/to/zendesk-mcp-server/index.js"],
+      "env": {
+        "ZENDESK_SUBDOMAIN": "your-subdomain",
+        "ZENDESK_EMAIL": "your-agent-email@example.com",
+        "ZENDESK_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
