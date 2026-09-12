@@ -116,6 +116,18 @@ Circle key - use the most urgent that applies:
 Once a Closed Lost renewal's close month ends without recovery, drop the account from the active
 book entirely (it's no longer a customer) - do not carry it forward as an FYI card.
 
+HIGH-ARR GATE: the "high-ARR account with severe usage risk" clause above is deliberate, not
+incidental - severe usage-risk dormancy (no visit >90 days) escalates an account to ACT NOW only
+when its ARR is above a threshold you set (start near your own book's median ARR, not its top
+quartile - the goal is catching real risk broadly, not only ever flagging your biggest accounts).
+Below that threshold, the same dormancy lands in WATCH instead. This gate applies ONLY to the
+usage-risk-dormancy path - a renewal deadline or a still-recoverable lost renewal escalates any
+account regardless of ARR, un-gated. Without this gate, a single usage-data refresh can put every
+dormant account into ACT NOW at once and the tier stops meaning "act on this today." Show the
+account's ARR on any usage-risk card with no renewal driving it, so the reasoning is visible on
+the card. See [why](../docs/design-decisions.md#why-usage-risk-escalation-is-gated-by-arr-and-other-tiers-arent)
+for the full reasoning.
+
 Group everything under each CS Manager. Within Red/Blue/Green, order by ARR (renewals first,
 highest ARR first) then by signal recency. The Rest of Accounts group is collapsed by default
 in the dashboard and excluded from the ARR-at-risk / urgency-mix summary numbers (it measures

@@ -199,6 +199,36 @@ need better observability into what's being filtered out, not just a shorter lis
 
 ---
 
+## Why usage-risk escalation is gated by ARR, and other tiers aren't
+
+Not every account carries equal weight in the Act Now tier, and that's deliberate.
+
+A renewal inside 30 days, or a lost renewal still inside its close month, escalates any account
+to Act Now regardless of size - a deal in motion is a deal in motion, and that path was never
+gated. Usage-risk dormancy (no product activity in 90+ days, with no renewal already driving
+urgency) is different. Applied evenly regardless of ARR, dormancy escalation on its own flooded
+the Act Now tier with low-value dormant accounts and buried the handful that actually mattered -
+the exact opposite of what the tier is for.
+
+**What changed:** severe usage-risk dormancy only escalates an account to Act Now above an ARR
+threshold; below it, the same dormancy lands in Watch instead - still visible, still tracked,
+just not competing at the same urgency as an account that's both dormant and high-value. The
+threshold was deliberately set near the book's **median** ARR, not the more conservative
+top-quartile cutoff proposed first and then rejected - the goal was to catch real risk broadly
+across the book, not to only ever flag the very largest accounts.
+
+**Why it matters:** without the gate, one usage-data refresh escalated every dormant account at
+once and Act Now roughly doubled overnight - a tier meant to say "act on this today" stops saying
+that the moment it's a quarter of the whole book. The account's ARR is shown directly on any
+usage-risk card that has no renewal driving it, so the reasoning behind the tier is visible on
+the card itself, not hidden in a rule nobody but the builder can see.
+
+**Tradeoff accepted:** two accounts with identical dormancy can land in different tiers purely on
+ARR, which reads as unfair at first glance until you consider what the alternative fixes and what
+it breaks - a tier that includes everyone stops helping anyone decide where to look first.
+
+---
+
 ## Why weekly, not daily or real-time
 
 Renewal timing and usage trends are slow-moving. A daily run would mostly report "nothing new,"

@@ -143,6 +143,12 @@ A lost renewal stays Act Now for the rest of its close month - it's still recove
 Once that month ends without recovery, the account is no longer an active customer: it's treated
 as churned and drops off the book entirely, rather than lingering as an informational FYI card.
 
+Not every account carries equal weight, on purpose: a renewal deadline escalates any account
+regardless of size, but usage-risk dormancy only escalates to Act Now above an ARR threshold -
+below it, the same dormancy lands in Watch instead. Without that gate, a single usage-data
+refresh once put a quarter of the whole book into Act Now at once, which defeats what the tier is
+for. See [why, in design-decisions.md](docs/design-decisions.md#why-usage-risk-escalation-is-gated-by-arr-and-other-tiers-arent).
+
 ---
 
 ## Results & Impact
