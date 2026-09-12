@@ -47,6 +47,18 @@ truth**, instead of a manual reconstruction that degrades under load or drifts a
 compiling it that week. Four dashboard tabs exist because four different people ask four
 different questions of that same underlying data - see [What was built](#what-was-built) below.
 
+**Why not an existing 360-view tool.** Off-the-shelf customer-success platforms were tried
+before this was built, and none of them fit cleanly - not because the products were bad, but
+because of how this company's own Salesforce is modeled. Accounts here have multiple child
+accounts under one parent, and opportunities live at the **contact** level, not the account
+level - a data shape most 360-view tools simply assume away. Every tool evaluated had to be bent
+around that shape, or ignore part of it, and none did both cleanly enough to trust for a whole
+team's weekly workflow. Building directly on Claude meant the account view could be built to
+match this company's actual CRM structure, instead of forcing the CRM to match someone else's
+product assumptions. See
+[why, in design-decisions.md](docs/design-decisions.md#why-not-an-off-the-shelf-360-view--customer-success-platform)
+for the specific data-shape mismatches that ruled out every tool evaluated.
+
 This wasn't assembled by pointing an AI at some connected tools and taking whatever came out.
 Every choice below - what stays read-only and why, which four tabs and why not one or five, why a
 filtering approach that looked reasonable at first got reversed months in, why the forecast tab's
@@ -137,6 +149,12 @@ as churned and drops off the book entirely, rather than lingering as an informat
 
 This has been running as a real weekly routine - not a demo - since June 2026, against an
 active, multi-account CS book, and has grown from four data sources to six over that time.
+
+**~4-5 hours a week given back to every CSM.** That's what it took, per person, to manually
+track and reconstruct an account-level overview across every system before this existed - time
+that now goes into the routine instead of into status-checking. Across an 11-person CS team,
+that's roughly **45-55 hours a week redirected from manual tracking to revenue-generating
+activity**: renewal calls, QBR prep, and expansion conversations, not spreadsheet reconciliation.
 
 **What it replaced:** a manual weekly pass across every account, cross-referencing a CRM, a
 support desk, a usage-analytics tool, a forecast tool, and outside news by hand, then writing up

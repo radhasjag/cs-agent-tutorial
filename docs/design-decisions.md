@@ -6,6 +6,38 @@ tutorial.
 
 ---
 
+## Why not an off-the-shelf 360-view / customer-success platform
+
+Existing customer-success and 360-account-view products were evaluated before any of this was
+built. None of them fit cleanly, and the reason was structural, not a feature gap: this company's
+own Salesforce doesn't match the account shape most of those tools assume.
+
+Two specifics that kept breaking it:
+- **Accounts have multiple child accounts under one parent.** A single customer relationship can
+  span several linked Salesforce Account records (divisions, agencies, sub-entities), not one
+  clean 1:1 account. Most 360-view tools assume one flat account record per customer and don't
+  have a clean way to roll a family of child accounts into one view - or usage/support data
+  attributed to a child account silently doesn't count toward the parent (the same shape of blind
+  spot documented in [iteration-notes.md](iteration-notes.md), independently discovered there via
+  the Pendo/partner-account usage check).
+- **Opportunities live at the contact level, not the account level.** Renewal and upsell
+  Opportunities in this org's Salesforce are tied to a Contact, with the account relationship
+  derived from there rather than the Opportunity sitting directly on the Account. Tools built
+  around "pull every Opportunity on this Account" don't have a clean answer for that - they
+  either miss Opportunities entirely or require non-standard configuration the vendor doesn't
+  really support.
+
+**Tradeoff accepted:** every tool evaluated could be bent to partially work around one of these
+two issues, but never both at once without either paying for custom implementation work or
+accepting a meaningfully incomplete view - the exact opposite of what a 360 view is supposed to
+guarantee. Building directly on Claude inverted that: the account view was built to match this
+company's actual Salesforce structure, instead of forcing the Salesforce structure to match a
+vendor's assumptions. That is also why this project reads Salesforce through plain SOQL queries
+rather than a pre-built connector's own data model - the query itself can walk the real
+parent/child and contact/opportunity relationships exactly as they exist here.
+
+---
+
 ## Why Claude desktop, not a custom API integration
 
 A custom-built integration would need its own hosting, its own auth handling per tool, and
