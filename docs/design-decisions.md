@@ -214,6 +214,36 @@ questions - collapsing them back into one view would mean compromising one or th
 
 ---
 
+## Why a Tab-4 (CS Team Forecast) tab
+
+Before this tab existed, the org-wide renewal and upsell forecast was assembled by hand, in
+spreadsheets, pooled from what each of the roughly 15 CSMs and AMs (plus leadership reviewing the
+roll-up) submitted on their own. That process had two compounding problems. First, it was
+friction-heavy: reconciling 15 people's numbers into one leadership view meant a lot of back and
+forth, every cycle. Second, and worse, it wasn't measuring the same thing across submitters - one
+person's number was a commit figure, another's was upside, and both got pooled into the same
+bucket without anyone flagging that they weren't the same kind of number. The practical effect was a
+forecast that drifted from reality in both directions: what leadership expected and what
+actually happened routinely showed a wide gap, positive misses and negative misses alike. The
+team's own name for this was "hopecasting" - forecasting had stopped meaning "our best precise
+estimate" and started meaning "what we hope happens."
+
+Tab-4 exists to fix the two root causes directly, not just to add a chart. It defines each bucket
+(Bank, Commit, Upside, Renewing, Total) with one precise, written-down rule applied identically
+across all 11 CSMs, so "commit" and "upside" can no longer get silently merged the way they did
+in spreadsheets. And it pulls live from Salesforce on the same weekly cadence as the rest of the
+dashboard, so there's one central, real-time place everyone (CSMs, AMs, and leadership) looks at,
+instead of N spreadsheets that were each a snapshot the moment they were exported.
+
+**Tradeoff accepted:** getting the definitions right took several correction rounds against a
+reference screenshot (IsWon vs. StageName, month vs. quarter scoping, Duplicate/Closed Lost
+exclusions - see [iteration-notes.md](iteration-notes.md)) precisely because the bar was "matches
+one exact, agreed-on definition," not "looks roughly right." That precision is the point: the
+whole reason for building this was to stop the forecast from being open to per-person
+interpretation.
+
+---
+
 ## Why the report catalogs are separate artifacts, not baked into the dashboard
 
 Two companion catalogs - a searchable index of published studies that used the product, and a
