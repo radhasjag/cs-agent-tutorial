@@ -38,7 +38,7 @@ manual cross-referencing described above.
 and upsell number was pooled by hand, in spreadsheets, from roughly 15 CSMs and AMs, then rolled
 up for leadership. That process didn't just cost time; it wasn't measuring the same thing across
 submitters. One person's number was a commit figure, another's was upside, and both landed in the
-same bucket with no flag that they weren't equivalent. The team's own name for the result was
+same bucket with no flag that they weren't equivalent. At best, we can call it
 **"hopecasting"** - a forecast that routinely missed reality in both directions, because it was
 never built on one consistent definition to begin with.
 
