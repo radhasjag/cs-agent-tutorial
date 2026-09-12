@@ -1,17 +1,21 @@
 # Customer Success Agent - a Claude Playbook
 
-A **no-code Customer Success monitoring agent**, built in the
-[Claude desktop app](https://claude.com/download): no server, no engineering team, just
-connected tools and a routine Claude runs on a schedule. It watches your customer accounts
-across **Salesforce, Zendesk, Pendo, Clari, and the web**, publishes a **four-tab dashboard**,
-and pings you in **Slack** - automatically, every week.
+A **Customer Success monitoring agent** built in the
+[Claude desktop app](https://claude.com/download) - designed so a non-technical CS/AM team can
+run it themselves, day to day. Getting connected takes a short, one-time technical setup
+(Salesforce, and optionally Zendesk/Clari) that you can do yourself or hand to a teammate or IT;
+after that, there's no server and no ongoing engineering work to keep it running. It watches
+your customer accounts across **Salesforce, Zendesk, Pendo, Clari, and the web**, publishes a
+**four-tab dashboard**, and pings you in **Slack** - automatically, every week.
 
 This page is organized in three parts: **why** this exists, **what** it does, and **how** it's
 built. If you only read one part, read the first - it's the part that explains why this isn't
 just an AI wrapper around some tools.
 
-> **Just want to run it?** Skip to [Get started](#get-started) - it's a click-through setup, no
-> terminal required. **Want the full reasoning behind every choice?** See
+> **Just want to run it?** Skip to [Get started](#get-started) - most of it is click-through;
+> Salesforce needs about 10 minutes of one-time technical setup (Zendesk/Clari add ~10 minutes
+> each, whenever you're ready), which you can hand to a technical teammate or IT if you'd rather
+> not do it yourself. **Want the full reasoning behind every choice?** See
 > [docs/design-decisions.md](docs/design-decisions.md) and
 > [docs/iteration-notes.md](docs/iteration-notes.md) - this README summarizes both.
 
@@ -102,11 +106,11 @@ question needed the answer shaped differently than the others - see
 Clicking any account in any tab jumps to its detail panel - no separate lookup, no tab-switching
 to piece the picture together by hand.
 
-**Optional companions**, built the same no-code way, that the Heat Map's per-account panel can
-cross-reference: a searchable catalog of **published studies that used your product** and a
-searchable catalog of **reports done with competitor tools**. Ask Claude to build these the same
-way as the main dashboard if you want them; they're independent artifacts, not required for the
-core routine.
+**Optional companions**, built the same way - just ask Claude, no custom setup needed - that the
+Heat Map's per-account panel can cross-reference: a searchable catalog of **published studies
+that used your product** and a searchable catalog of **reports done with competitor tools**. Ask
+Claude to build these the same way as the main dashboard if you want them; they're independent
+artifacts, not required for the core routine.
 
 ### Colored urgency indicators
 

@@ -147,7 +147,7 @@ four tabs each show.
   [docs/google-docs-connector-request.md](docs/google-docs-connector-request.md)
 - **Extra Salesforce write-protection** (a client-side guardrail, on top of read-only): [`advanced/`](advanced/)
 - **Report catalogs** (published studies / competitor-tool reports, cross-referenced from the
-  Heat Map tab) — optional, built the same no-code way; ask Claude to set one up from a Slack
+  Heat Map tab) — optional, built the same way (just ask); ask Claude to set one up from a Slack
   channel or spreadsheet of reports if useful to your team.
 
 ---

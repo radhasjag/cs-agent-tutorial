@@ -19,7 +19,7 @@ zero infrastructure and zero engineering support for a non-technical team to run
 
 **Rejected:** a hosted app with its own backend and database. Overkill for the actual job - a
 scheduled read-and-summarize routine - and it would have re-introduced the maintenance burden
-the no-code approach is specifically avoiding.
+the zero-infrastructure approach above is specifically avoiding.
 
 ---
 
