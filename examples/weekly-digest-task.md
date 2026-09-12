@@ -7,7 +7,7 @@ Claude uses your connected tools automatically - your **Salesforce connector** r
 queries, your **Pendo connector** checks usage, your **Zendesk and Clari connectors** (if you
 set them up - both optional, see [SETUP.md](../SETUP.md) Step 3b) add ticket and forecast
 context, web search finds news, and your **Slack connector** sends the message. The full result
-is published as a **Claude artifact** - a three-tab dashboard with a stable URL that updates in
+is published as a **Claude artifact** - a four-tab dashboard with a stable URL that updates in
 place each week. No commands to type.
 
 **Before using, replace the PLACEHOLDERS:**
@@ -37,7 +37,7 @@ Paste this block to Claude:
 You are my Customer Success monitoring agent. Review EVERY active account in my book every run
 - do not silently drop accounts with nothing to report; put them in a neutral, collapsed "Rest
 of Accounts" group instead so I can see the whole book was actually checked. Publish the result
-as a three-tab dashboard artifact, and send a short summary to my Slack DM (YOUR_SLACK_DM).
+as a four-tab dashboard artifact, and send a short summary to my Slack DM (YOUR_SLACK_DM).
 
 Use my connected tools: the Salesforce connector (READ-ONLY - only run queries, never change
 data), the Pendo connector, the Zendesk connector (if connected, also READ-ONLY), the Clari
@@ -58,8 +58,10 @@ STEP 1 - RENEWALS within 90 DAYS (Salesforce, read-only):
 
 Note: ARR comes from the prior contract via Renewed_From - the open renewal's own ARR is
 usually blank. Prebuilt "renewal in N days" checkboxes are unreliable; use the date field. Also
-check: if a renewal Opportunity is Closed Lost but its due date hasn't passed yet, treat it as
-ACT NOW (still recoverable), not FYI - it only settles to FYI once the due date has passed.
+check: if a renewal Opportunity is Closed Lost but its close month hasn't ended yet, treat it as
+ACT NOW (still recoverable through month-end) - only once that month ends without recovery does
+the account stop being counted as an active customer at all (it drops off the book, it does not
+settle into FYI).
 
 STEP 2 - USAGE RISK (Pendo):
 Pendo accounts are keyed by the Salesforce Account ID. For each active account, check the
@@ -104,18 +106,22 @@ conversation, not a tiering input - do not let it move an account between urgenc
 STEP 7 - COMPILE AND ASSIGN TIERS (every account, every run):
 Circle key - use the most urgent that applies:
   Red circle (ACT NOW) - renewal within 30 days, OR high-ARR account with severe usage risk (no
-    visit >90 days), OR a Closed Lost renewal whose due date hasn't passed
+    visit >90 days), OR a Closed Lost renewal still inside its close month (recoverable through
+    month-end)
   Blue circle (WATCH) - renewal 31-90 days out, OR moderate usage risk (no visit 60-90 days)
   Green circle (FYI) - positive or informational only (study published, notable news, healthy
-    usage, a Closed Lost renewal past its due date); no time-critical risk
+    usage); no time-critical risk
   Gray (REST OF ACCOUNTS) - genuinely nothing to report this run
+
+Once a Closed Lost renewal's close month ends without recovery, drop the account from the active
+book entirely (it's no longer a customer) - do not carry it forward as an FYI card.
 
 Group everything under each CS Manager. Within Red/Blue/Green, order by ARR (renewals first,
 highest ARR first) then by signal recency. The Rest of Accounts group is collapsed by default
 in the dashboard and excluded from the ARR-at-risk / urgency-mix summary numbers (it measures
 risk, not headcount) but is still fully searchable/filterable.
 
-STEP 8 - PUBLISH THE DASHBOARD (three tabs, one artifact):
+STEP 8 - PUBLISH THE DASHBOARD (four tabs, one artifact):
 
 TAB 1 - "360 Account View": one card per account with a 4px left color stripe matching its
 tier, urgency pill, account name, CS and AM owners, metric tags (renewal date + days remaining,
@@ -135,6 +141,19 @@ per-account detail panel showing everything gathered above in one place - Salesf
 Zendesk, Chatter note, Clari context - plus a cross-reference against any report catalogs you
 maintain (e.g. "this account has published a study using our product" or "this account's report
 used a competitor tool"), if you have them.
+
+TAB 4 - "CS Team Forecast" (optional - org-wide, typically built by whoever owns the whole CS
+book, e.g. a team lead, not by each individual CSM): a table of Bank / Committed / Upside / Total
+for both Renewal and Upsell, one row per CSM, for the current month, plus a cumulative-by-week
+Actual vs. Goal vs. Forecast chart for the quarter. Pull every open and closed Renewal- and
+Upsell-type opportunity closing in the current month, and bucket each one with ONE written-down
+rule set reused unchanged across every CSM - never a per-person judgment call. This is the one
+tab where multiple people's numbers get rolled into a single figure, so getting the definitions
+exactly right matters more here than anywhere else in the dashboard - see
+[design-decisions.md](../docs/design-decisions.md#why-a-tab-4-cs-team-forecast-tab) before
+building it for what has to be nailed down (won-vs-still-open handling, month vs. quarter scope,
+excluding dead/duplicate records, and which dollar field actually represents what your business
+means by "forecast" - it's rarely the first "amount" field you find).
 
 Color palette: navy #111827 header, page bg #F1F4F8, card bg #FFFFFF, border #DDE3EC,
 red #DC2626 / red-bg #FEF2F2, blue #1E6FE0 / blue-bg #EFF6FF, green #15803D / green-bg #F0FDF4,

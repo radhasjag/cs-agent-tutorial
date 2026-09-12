@@ -113,7 +113,42 @@ before flagging any account, also check its Salesforce children - even the inact
 
 ---
 
-## What's next (v3 candidates)
+## What shipped in v3, and what broke getting there
+
+The CS Team Forecast tab (see [design-decisions.md](design-decisions.md#why-a-tab-4-cs-team-forecast-tab))
+went through more correction rounds against a reference than any other single piece of this
+project - deliberately, since it's the one tab where several people's numbers land in a single
+figure and "roughly right" isn't good enough for a number leadership will act on.
+
+**13. A "won" check based on the wrong field silently under-counted closed deals.** The forecast's
+closed-deal bucket was built on a boolean "won" flag. Some genuinely closed-and-paid deals didn't
+have that flag set, because a separate in-between stage also counted as closed for this business
+without tripping the flag. Fix: check the actual stage name directly instead of a derived
+flag that didn't cover every stage that counted as closed.
+
+**14. A pipeline figure came out roughly 40x too high because it was scoped to the wrong time
+window.** One bucket was meant to be a single month's figure but was accidentally pulling in a
+full quarter's worth of pipeline. Fix: scope every bucket to the same explicit month, consistently,
+rather than leaving the window implicit and assuming it matched elsewhere in the sheet.
+
+**15. Dead records still counted toward the forecast if they carried an old tag.** Duplicate and
+closed-lost records were still being tallied into totals whenever they'd been tagged before being
+marked dead, quietly inflating at least one bucket by a large amount. Fix: exclude dead and
+duplicate records from every bucket outright, regardless of any tag left over from before they
+were marked that way.
+
+**16. The dollar-value field itself went through two corrections.** The first pass used a legacy
+proxy value for open deals; a stakeholder review found it materially underquoted a real deal
+against that deal's own record, so it moved to the deal's stated amount. A second review found
+the business already had a dedicated "expected value" field, distinct from the general amount
+field and closer to what "forecast" actually meant here - switching to it roughly tripled the
+table's match rate against the original reference. Lesson, consistent with item 7 above: when a
+business already has a specific field for the concept being computed, use that field - don't
+assume a general-purpose column means the same thing everyone actually means.
+
+---
+
+## What's next (v4 candidates)
 
 - Match ownership by a stable ID instead of a name string - closes issue #1 at the root instead
   of just detecting it after the fact. Still open; each rename gets caught and fixed

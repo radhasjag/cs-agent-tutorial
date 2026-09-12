@@ -133,8 +133,8 @@ No code — you just tell Claude what you want and it sets up a recurring task.
 > runs the next time you open it.
 
 **That's the whole setup.** Each week you'll get a Slack ping and a dashboard covering your
-whole book — see [README.md](README.md#three-views-one-dashboard) for what the dashboard's
-three tabs each show.
+whole book — see [README.md](README.md#four-views-one-dashboard) for what the dashboard's
+four tabs each show.
 
 ---
 

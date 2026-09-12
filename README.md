@@ -20,6 +20,47 @@ web**, then publishes a **multi-view dashboard** and pings you in **Slack** - au
 > "only show me what needs attention" design once that filtering turned out to be hiding real
 > risk. That evolution is the real story here - see [What changed in v2](#what-changed-in-v2).
 
+> **v3 update:** a fourth tab, **CS Team Forecast**, added an org-wide view for a different
+> audience: not "what does one CSM need to act on," but "what does the whole team's renewal and
+> upsell forecast add up to, right now, on one shared definition." See
+> [What changed in v3](#what-changed-in-v3).
+
+---
+
+## Why this exists
+
+Two versions of the same underlying problem, solved the same way.
+
+**Weekly account visibility.** A manual pass across a CRM, a support desk, a usage-analytics
+tool, and outside news, repeated for every account, every week, does not survive contact with a
+busy quarter - not from lack of effort, but because cross-referencing four systems by hand gets
+harder every time you add a fifth, and a missed account looks identical to a quiet one until
+something breaks (see [docs/iteration-notes.md](docs/iteration-notes.md)).
+
+**Org-wide forecasting.** Before the CS Team Forecast tab existed, the whole team's renewal and
+upsell number was pooled by hand, in spreadsheets, from roughly 15 CSMs and AMs - then rolled up
+for leadership. That process didn't just cost time; it wasn't measuring the same thing across
+submitters. One person's number was a commit figure, another's was upside, and both landed in the
+same bucket with no flag that they weren't equivalent. The team's own name for the result was
+**"hopecasting"** - a forecast that routinely missed reality in both directions, because it was
+never built on one consistent definition to begin with.
+
+Both problems have the same fix: **one automatically-refreshed, precisely-defined source of
+truth**, instead of a manual reconstruction that degrades under load or drifts across whoever's
+compiling it that week. Four dashboard tabs exist because four different people ask four
+different questions of that same underlying data - see
+[Four views, one dashboard](#four-views-one-dashboard) below.
+
+This wasn't assembled by pointing an AI at some connected tools and taking whatever came out.
+Every choice below - what stays read-only and why, which four tabs and why not one or five, why a
+filtering approach that looked reasonable at first got reversed months in, why the forecast
+tab's field-level definitions went through several correction rounds against a reference before
+they were trusted - was made deliberately, run against a live account book for months, and
+corrected when real usage proved an assumption wrong.
+[docs/design-decisions.md](docs/design-decisions.md) and
+[docs/iteration-notes.md](docs/iteration-notes.md) are the record of that thinking, not
+documentation written after the fact to justify it.
+
 ---
 
 ## What it does
@@ -36,7 +77,7 @@ Once a week (we use **Thursdays at 2pm**), the agent:
 5. Searches the **web** for notable, business-relevant news and published studies per account.
 6. Pulls the **latest customer communication** (who / when / subject) from Salesforce, plus any
    recent internal **handoff note** left in Salesforce Chatter (e.g. "watch this while I'm out").
-7. Publishes a **multi-view dashboard artifact** - see [Three views, one dashboard](#three-views-one-dashboard)
+7. Publishes a **multi-view dashboard artifact** - see [Four views, one dashboard](#four-views-one-dashboard)
    below. The dashboard URL stays the same every week (it updates in place).
 8. Sends a **short Slack DM** - just the **top 3 most urgent accounts** and a link to the full
    dashboard.
@@ -51,15 +92,24 @@ See a sample: [docs/sample-slack-digest.md](docs/sample-slack-digest.md).
 
 ---
 
-## Three views, one dashboard
+## Four views, one dashboard
 
-The dashboard is one Claude artifact with three tabs, each answering a different question:
+The dashboard is one Claude artifact with four tabs, each answering a different question, for a
+different audience:
 
-| Tab | Answers | Built from |
-|-----|---------|------------|
-| **360 Account View** | "What needs attention this week, and why?" | Salesforce, Pendo, Zendesk, news/studies, Chatter |
-| **Tasks** | "What's on the calendar - renewals, QBRs, reviews - for the whole team?" | Salesforce renewal dates, on a repeating touchpoint schedule (see [iteration notes](docs/iteration-notes.md)) |
-| **Heat Map** | "Show me every account, colored by urgency, with a full per-account detail panel." | All of the above, plus Clari and the report catalogs below |
+| Tab | Answers | Built from | Mainly for |
+|-----|---------|------------|------------|
+| **360 Account View** | "What needs attention this week, and why?" | Salesforce, Pendo, Zendesk, news/studies, Chatter | Each CSM's own book |
+| **Tasks** | "What's on the calendar - renewals, QBRs, reviews - for the whole team?" | Salesforce renewal dates, on a repeating touchpoint schedule (see [iteration notes](docs/iteration-notes.md)) | CSMs and managers planning ahead |
+| **Heat Map** | "Show me every account, colored by urgency, with a full per-account detail panel." | All of the above, plus Clari and the report catalogs below | Anyone who needs the complete picture on one account |
+| **CS Team Forecast** | "What does the org actually expect to close this month and quarter - one number, one definition, every team?" | Salesforce renewal + upsell opportunities, bucketed by one shared rule set applied identically to every CSM | Leadership and the whole CS/AM org |
+
+Four tabs, not one, because stretching "what needs my attention," "what's on the calendar,"
+"everything about this one account," and "the org-wide number leadership needs" into a single
+view would mean compromising all four. Each one exists because a real person asking a real
+question needed the answer shaped differently than the others - see
+[docs/design-decisions.md](docs/design-decisions.md) for the tab-by-tab reasoning, most recently
+[why the CS Team Forecast tab](docs/design-decisions.md#why-a-tab-4-cs-team-forecast-tab).
 
 Clicking any account in any tab jumps to its detail panel - no separate lookup, no tab-switching
 to piece the picture together by hand.
@@ -95,6 +145,22 @@ Four things changed after running v1 for real, for months, against a full accoun
 
 ---
 
+## What changed in v3
+
+**Added the CS Team Forecast tab** - a fourth tab for a different audience than the first three.
+Not "what does one CSM need to act on this week," but "what does the whole team's renewal and
+upsell forecast add up to, right now, on one definition everyone actually agrees on." It replaced
+a spreadsheet-pooling process across roughly 15 CSMs and AMs that had drifted into what the team
+called "hopecasting" - commit and upside figures merged into one bucket with no flag that they
+weren't the same kind of number, producing a forecast that routinely missed reality in both
+directions. See [design-decisions.md](docs/design-decisions.md#why-a-tab-4-cs-team-forecast-tab)
+for the full reasoning, and [iteration-notes.md](docs/iteration-notes.md) for the correction
+rounds it took to get the field-level definitions exactly right - this tab is the one place in
+the whole dashboard where multiple people's numbers land in a single figure, so precision here
+mattered more than anywhere else in the project.
+
+---
+
 ## Results & Impact
 
 This has been running as a real weekly routine - not a demo - since June 2026, against an
@@ -125,6 +191,10 @@ changed.
 - **Resilient by design.** When a data source is temporarily unreachable, the routine still runs
   and flags what it couldn't check, rather than failing outright or silently omitting it (see
   [docs/iteration-notes.md](docs/iteration-notes.md)).
+- **One forecast number instead of ~15 people's spreadsheets.** The CS Team Forecast tab replaced
+  a manual pooling process across the whole CS/AM org with one live, identically-defined number
+  per CSM - closing the gap between what leadership expected and what actually happened that the
+  team had started calling "hopecasting."
 
 *(Figures and specifics above reflect this project's own production history. If you adapt this
 for your own team, swap in your own measurements and sources - the structural lessons don't
@@ -144,7 +214,7 @@ depend on any particular numbers or tool list to be true.)*
                        v        v         v        v         v         v
                  Salesforce  Pendo   Zendesk    Clari   Web search   Artifact
                    (MCP)   (connector) (MCP)     (MCP)                dashboard
-                                                                     (3 tabs, stable URL)
+                                                                     (4 tabs, stable URL)
                                                                           |
                                                                           v
                                                               Slack (connector) + optional
@@ -169,12 +239,16 @@ Each account in the **360 Account View** and **Heat Map** gets a color-coded car
 urgency:
 
 - Red (Act Now) - renewal within 30 days, OR a high-value account with no activity in over 90
-  days, OR a lost renewal whose due date hasn't passed yet (still recoverable)
+  days, OR a lost renewal still inside its close month (still recoverable through month-end)
 - Blue (Watch) - renewal 31-90 days out, OR moderate usage risk (quiet for 60-90 days)
-- Green (FYI) - informational signal only (news, published study, healthy usage, a lost renewal
-  past its due date); no immediate risk
+- Green (FYI) - informational signal only (news, published study, healthy usage); no immediate
+  risk
 - Gray (Rest of Accounts) - nothing to report this week; collapsed by default so the meaningful
   tiers stay in view, but still searchable/filterable and still reviewed every run
+
+A lost renewal stays Act Now for the rest of its close month - it's still recoverable until then.
+Once that month ends without recovery, the account is no longer an active customer: it's treated
+as churned and drops off the book entirely, rather than lingering as an informational FYI card.
 
 ---
 

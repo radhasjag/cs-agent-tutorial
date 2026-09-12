@@ -4,12 +4,13 @@ What the weekly output looks like. All accounts, people, and numbers below are *
 
 ---
 
-## Dashboard artifact (full detail, three tabs)
+## Dashboard artifact (full detail, four tabs)
 
 The dashboard redeploys to the same Claude artifact URL every week - "360 Account View" (every
-account, tiered), "Tasks" (renewals/QBRs due, by month), and "Heat Map" (full-book color grid
-with a per-account panel pulling from every connected source). See
-[README.md](../README.md#three-views-one-dashboard) for what each tab covers.
+account, tiered), "Tasks" (renewals/QBRs due, by month), "Heat Map" (full-book color grid
+with a per-account panel pulling from every connected source), and "CS Team Forecast" (one
+org-wide renewal/upsell number, on one shared definition, across every team). See
+[README.md](../README.md#four-views-one-dashboard) for what each tab covers.
 
 ---
 
@@ -46,12 +47,15 @@ Full dashboard (91 accounts, 4 Act Now / 11 Watch / 22 FYI / 54 Rest of Accounts
 ## Circle key
 
 - Red circle (ACT NOW) - renewal within 30 days, OR high-ARR account dormant >90 days, OR a lost
-  renewal whose due date hasn't passed yet
+  renewal still inside its close month (recoverable through month-end)
 - Blue circle (WATCH) - renewal 31-90 days out, OR moderate usage risk (quiet 60-90 days)
-- Green circle (FYI) - informational only (news, published study, healthy usage, a lost renewal
-  past its due date); no immediate risk
+- Green circle (FYI) - informational only (news, published study, healthy usage); no immediate
+  risk
 - Gray (REST OF ACCOUNTS) - nothing to report this week; still reviewed, just collapsed by
   default in the dashboard so it doesn't crowd out the tiers that need attention
+
+Once a lost renewal's close month ends without recovery, the account is no longer active - it's
+treated as churned and drops off the book, not shown as an FYI card.
 
 ---
 
