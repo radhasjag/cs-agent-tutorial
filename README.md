@@ -104,6 +104,15 @@ See a full sample: [docs/sample-slack-digest.md](docs/sample-slack-digest.md).
 The dashboard is one Claude artifact with four tabs, each answering a different question, for a
 different audience:
 
+```mermaid
+flowchart TD
+    D["Dashboard artifact<br/>one stable URL, updates every week"]
+    D --> A["360 Account View<br/>What needs attention this week, and why?<br/>for: each CSM's own book"]
+    D --> B["Tasks<br/>What's on the calendar?<br/>for: CSMs and managers planning ahead"]
+    D --> C["Heat Map<br/>Everything about one account, in full<br/>for: anyone who needs the complete picture"]
+    D --> E["CS Team Forecast<br/>One org-wide number, one definition<br/>for: leadership and the whole CS/AM org"]
+```
+
 | Tab | Answers | Built from | Mainly for |
 |-----|---------|------------|------------|
 | **360 Account View** | "What needs attention this week, and why?" | Salesforce, Pendo, Zendesk, news/studies, Chatter | Each CSM's own book |
