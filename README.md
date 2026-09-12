@@ -8,9 +8,10 @@ after that, there's no server and no ongoing engineering work to keep it running
 your customer accounts across **Salesforce, Zendesk, Pendo, Clari, and the web**, publishes a
 **four-tab dashboard**, and pings you in **Slack** - automatically, every week.
 
-This page is organized in three parts: **why** this exists, **what** it does, and **how** it's
-built. If you only read one part, read the first - it's the part that explains why this isn't
-just an AI wrapper around some tools.
+This page is numbered so you can jump straight to what you need: **(1) why** this exists, **(2)
+what** was built, **(3) the results**, **(4) how** it's built, **(5)** how it evolved. Read (1)
+first if you only read one - it's the part that explains why this isn't just an AI wrapper
+around some tools.
 
 > **Just want to run it?** Skip to [Get started](#get-started) - most of it is click-through;
 > Salesforce needs about 10 minutes of one-time technical setup (Zendesk/Clari add ~10 minutes
@@ -21,56 +22,40 @@ just an AI wrapper around some tools.
 
 ---
 
-## Why this exists
+## 1. Why this exists
 
-Two versions of the same underlying problem, solved the same way.
+**Two problems, one fix.**
 
-**Weekly account visibility.** A manual pass across a CRM, a support desk, a usage-analytics
-tool, a forecast tool, and outside news, repeated for every account, every week, does not survive
-contact with a busy quarter - not from lack of effort, but because cross-referencing systems by
-hand gets harder every time you add another, and a missed account looks identical to a quiet one
-until something breaks (see [docs/iteration-notes.md](docs/iteration-notes.md)). This project
-alone spans **seven connected systems** - Salesforce, Zendesk, Pendo, Clari, web search, Slack,
-and Tability - on top of what it replaced: a spreadsheet-pooled forecast process and the
-manual cross-referencing described above.
+1. **Weekly account visibility didn't scale by hand.** Cross-referencing a CRM, a support desk, a
+   usage tool, a forecast tool, and outside news for every account, every week, breaks down the
+   first busy quarter - and a missed account looks identical to a quiet one until something
+   breaks (see [iteration-notes.md](docs/iteration-notes.md)). This project now spans **seven
+   connected systems** automatically - Salesforce, Zendesk, Pendo, Clari, web search, Slack,
+   Tability.
+2. **Org-wide forecasting wasn't consistent.** The team's renewal and upsell number was pooled by
+   hand from ~15 CSMs and AMs - commit and upside figures landing in one bucket with no flag they
+   weren't equivalent. The team's own name for the result: **"hopecasting."**
 
-**Org-wide forecasting.** Before this project's forecast tab existed, the whole team's renewal
-and upsell number was pooled by hand, in spreadsheets, from roughly 15 CSMs and AMs, then rolled
-up for leadership. That process didn't just cost time; it wasn't measuring the same thing across
-submitters. One person's number was a commit figure, another's was upside, and both landed in the
-same bucket with no flag that they weren't equivalent. At best, we can call it
-**"hopecasting"** - a forecast that routinely missed reality in both directions, because it was
-never built on one consistent definition to begin with.
+**The fix, both times:** one automatically-refreshed, precisely-defined source of truth instead
+of a manual reconstruction - see [What was built](#2-what-was-built) and
+[Results & Impact](#3-results--impact) below.
 
-Both problems have the same fix: **one automatically-refreshed, precisely-defined source of
-truth**, instead of a manual reconstruction that degrades under load or drifts across whoever's
-compiling it that week. Four dashboard tabs exist because four different people ask four
-different questions of that same underlying data - see [What was built](#what-was-built) below.
+**Built, not bought.** Off-the-shelf CS platforms don't fit this company's Salesforce: accounts
+have multiple child accounts, and opportunities sit at the **contact** level, not the account
+level - a shape most 360-view tools assume away. Every tool evaluated had to bend around that or
+ignore part of it. Full reasoning:
+[design-decisions.md](docs/design-decisions.md#why-not-an-off-the-shelf-360-view--customer-success-platform).
 
-**Why not an existing 360-view tool.** Off-the-shelf customer-success platforms were tried
-before this was built, and none of them fit cleanly - not because the products were bad, but
-because of how this company's own Salesforce is modeled. Accounts here have multiple child
-accounts under one parent, and opportunities live at the **contact** level, not the account
-level - a data shape most 360-view tools simply assume away. Every tool evaluated had to be bent
-around that shape, or ignore part of it, and none did both cleanly enough to trust for a whole
-team's weekly workflow. Building directly on Claude meant the account view could be built to
-match this company's actual CRM structure, instead of forcing the CRM to match someone else's
-product assumptions. See
-[why, in design-decisions.md](docs/design-decisions.md#why-not-an-off-the-shelf-360-view--customer-success-platform)
-for the specific data-shape mismatches that ruled out every tool evaluated.
-
-This wasn't assembled by pointing an AI at some connected tools and taking whatever came out.
-Every choice below - what stays read-only and why, which four tabs and why not one or five, why a
-filtering approach that looked reasonable at first got reversed months in, why the forecast tab's
-field-level definitions went through several correction rounds against a reference before they
-were trusted - was made deliberately, run against a live account book for months, and corrected
-when real usage proved an assumption wrong. [docs/design-decisions.md](docs/design-decisions.md)
-and [docs/iteration-notes.md](docs/iteration-notes.md) are the record of that thinking, not
+**Nothing here was pointing an AI at some tools and taking whatever came out.** Every choice -
+what's read-only, why four tabs, why a filtering design got reversed months in, why the forecast
+tab took several correction rounds against a reference - was deliberate, tested against a live
+account book for months, and corrected when wrong. [design-decisions.md](docs/design-decisions.md)
+and [iteration-notes.md](docs/iteration-notes.md) are the record of that thinking, not
 documentation written after the fact to justify it.
 
 ---
 
-## What was built
+## 2. What was built
 
 ### The weekly routine
 
@@ -169,7 +154,7 @@ for. See [why, in design-decisions.md](docs/design-decisions.md#why-usage-risk-e
 
 ---
 
-## Results & Impact
+## 3. Results & Impact
 
 This has been running as a real weekly routine - not a demo - since June 2026, against an
 active, multi-account CS book, and has grown from four data sources to six over that time.
@@ -217,7 +202,7 @@ depend on any particular numbers or tool list to be true.)*
 
 ---
 
-## How it's built
+## 4. How it's built
 
 ### Architecture
 
@@ -273,7 +258,7 @@ tool - there's nothing to accidentally call.
 
 ---
 
-## Evolution: v1 → v2 → v3
+## 5. Evolution: v1 → v2 → v3
 
 This project shipped in three stages, each one a response to something a live account book
 actually surfaced - not a plan drawn up in advance and executed unchanged.
@@ -302,8 +287,8 @@ months, against a full account book, changed four things:
 **v3 - the CS Team Forecast tab.** A fourth tab for a different audience than the first three:
 not "what does one CSM need to act on this week," but "what does the whole team's renewal and
 upsell forecast add up to, right now, on one definition everyone actually agrees on." It replaced
-the spreadsheet-pooled "hopecasting" process described in [Why this exists](#why-this-exists)
-above. See [design-decisions.md](docs/design-decisions.md#why-a-tab-4-cs-team-forecast-tab) for
+the spreadsheet-pooled "hopecasting" process described in
+[Why this exists](#1-why-this-exists) above. See [design-decisions.md](docs/design-decisions.md#why-a-tab-4-cs-team-forecast-tab) for
 the full reasoning and [iteration-notes.md](docs/iteration-notes.md) for the correction rounds it
 took to get the field-level definitions exactly right - this tab is the one place in the whole
 dashboard where multiple people's numbers land in a single figure, so precision here mattered
@@ -311,7 +296,7 @@ more than anywhere else in the project.
 
 ---
 
-## What's in this repo
+## 6. What's in this repo
 
 | Path | What |
 |------|------|
@@ -331,7 +316,7 @@ more than anywhere else in the project.
 
 ---
 
-## Privacy
+## 7. Privacy
 
 This tutorial contains **no real data** - every name, account, ticket, and ID is a placeholder
 or fake example. Your real customer list, tickets, forecasts, and credentials stay inside your
@@ -339,6 +324,6 @@ own Claude app and connected tools; nothing sensitive lives in this repo.
 
 ---
 
-## License
+## 8. License
 
 MIT - use it, adapt it, share it with your team.
