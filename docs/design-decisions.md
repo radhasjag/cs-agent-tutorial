@@ -270,6 +270,16 @@ was added with its own layout suited to that job - a full-book color grid plus a
 per-account panel. Same underlying data, different presentation for a different question ("show
 me this one account, completely" vs. "show me what needs attention this week").
 
+The tab also carries its own summary layer above the account grid, not just the per-account
+panel: a US map (a tile-grid cartogram, not literal state borders - a deliberate choice to avoid
+hand-authored map-path risk) shaded by account density and ARR, four macro stat tiles (total ARR,
+the top state by ARR, average and median ARR per account, and how many accounts have a published
+economic-impact study), and a full sortable/searchable account table underneath. None of that was
+invented from scratch for this project - it deliberately mirrors a company-wide account heat map
+that sales leadership already used and trusted, scoped down to the CS renewal book, so the same
+visual language and stats leadership already reads carry straight over instead of asking them to
+learn a second convention.
+
 **Tradeoff accepted:** two tabs to maintain instead of one, and some data now gets fetched and
 rendered in two different shapes. Accepted because the two tabs genuinely answer different
 questions - collapsing them back into one view would mean compromising one or the other.

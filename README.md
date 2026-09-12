@@ -109,7 +109,7 @@ flowchart TD
     D["Dashboard artifact<br/>one stable URL, updates every week"]
     D --> A["360 Account View<br/>What needs attention this week, and why?<br/>for: each CSM's own book"]
     D --> B["Tasks<br/>What's on the calendar?<br/>for: CSMs and managers planning ahead"]
-    D --> C["Heat Map<br/>Everything about one account, in full<br/>for: anyone who needs the complete picture"]
+    D --> C["Heat Map<br/>Geography map + macro stats + everything about one account<br/>for: anyone who needs the complete picture"]
     D --> E["CS Team Forecast<br/>One org-wide number, one definition<br/>for: leadership and the whole CS/AM org"]
 ```
 
@@ -117,7 +117,7 @@ flowchart TD
 |-----|---------|------------|------------|
 | **360 Account View** | "What needs attention this week, and why?" | Salesforce, Pendo, Zendesk, news/studies, Chatter | Each CSM's own book |
 | **Tasks** | "What's on the calendar - renewals, QBRs, reviews - for the whole team?" | Salesforce renewal dates, on a repeating touchpoint schedule (see [iteration notes](docs/iteration-notes.md)) | CSMs and managers planning ahead |
-| **Heat Map** | "Show me every account, colored by urgency, with a full per-account detail panel." | All of the above, plus Clari and the report catalogs below | Anyone who needs the complete picture on one account |
+| **Heat Map** | "Show me the whole book: a geography map, macro stats, and every account colored by urgency, with a full per-account detail panel." | All of the above, plus Clari and the report catalogs below | Anyone who needs the complete picture, on one account or the whole book |
 | **CS Team Forecast** | "What does the org actually expect to close this month and quarter - one number, one definition, every team?" | Salesforce renewal + upsell opportunities, bucketed by one shared rule set applied identically to every CSM | Leadership and the whole CS/AM org |
 
 Four tabs, not one, because stretching "what needs my attention," "what's on the calendar,"
@@ -129,6 +129,15 @@ question needed the answer shaped differently than the others - see
 
 Clicking any account in any tab jumps to its detail panel - no separate lookup, no tab-switching
 to piece the picture together by hand.
+
+The Heat Map tab carries its own summary layer above the account grid: a US map (shaded by
+account density and ARR), four macro stat tiles (total ARR, the top state by ARR, average and
+median ARR per account, and how many accounts have a published economic-impact study), and a
+full sortable/searchable account table - on top of the per-account detail panel. None of this
+was invented from scratch: it deliberately mirrors a company-wide account heat map sales
+leadership already used, scoped down to the CS renewal book, so leadership reads the same visual
+language and stats they already trust. See
+[why, in design-decisions.md](docs/design-decisions.md#why-a-heat-map-tab-on-top-of-the-360-account-view).
 
 **Optional companions**, built the same way - just ask Claude, no custom setup needed - that the
 Heat Map's per-account panel can cross-reference: a searchable catalog of **published studies
