@@ -26,10 +26,13 @@ just an AI wrapper around some tools.
 Two versions of the same underlying problem, solved the same way.
 
 **Weekly account visibility.** A manual pass across a CRM, a support desk, a usage-analytics
-tool, and outside news, repeated for every account, every week, does not survive contact with a
-busy quarter - not from lack of effort, but because cross-referencing four systems by hand gets
-harder every time you add a fifth, and a missed account looks identical to a quiet one until
-something breaks (see [docs/iteration-notes.md](docs/iteration-notes.md)).
+tool, a forecast tool, and outside news, repeated for every account, every week, does not survive
+contact with a busy quarter - not from lack of effort, but because cross-referencing systems by
+hand gets harder every time you add another, and a missed account looks identical to a quiet one
+until something breaks (see [docs/iteration-notes.md](docs/iteration-notes.md)). This project
+alone spans **seven connected systems** - Salesforce, Zendesk, Pendo, Clari, web search, Slack,
+and Tability - on top of what it replaced: a spreadsheet-pooled forecast process and the
+manual cross-referencing described above.
 
 **Org-wide forecasting.** Before this project's forecast tab existed, the whole team's renewal
 and upsell number was pooled by hand, in spreadsheets, from roughly 15 CSMs and AMs, then rolled
@@ -157,7 +160,7 @@ people every cycle.
   quietly hiding real usage risk on accounts it had decided weren't worth showing.
 - **A fuller picture per account, not just a longer list of sources.** The Heat Map's
   per-account panel is the "every corner of every system, one screen" view - the thing that
-  used to require opening four or five separate tools to reconstruct by hand.
+  used to require opening half a dozen separate tools to reconstruct by hand.
 - **One forecast number instead of ~15 people's spreadsheets.** The CS Team Forecast tab replaced
   a manual pooling process across the whole CS/AM org with one live, identically-defined number
   per CSM - closing the gap between what leadership expected and what actually happened that the
