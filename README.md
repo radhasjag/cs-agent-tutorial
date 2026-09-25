@@ -1,4 +1,4 @@
-# Customer Success Agent - a Claude Playbook
+# Customer Success Agent - a Playbook
 
 A **Customer Success monitoring agent** built in the
 [Claude desktop app](https://claude.com/download) - designed so a non-technical CS/AM team can
